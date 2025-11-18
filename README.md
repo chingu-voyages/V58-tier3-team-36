@@ -36,7 +36,7 @@ coding!
 
 - Shruthi Reddy : [GitHub](https://github.com/shrusred) / [LinkedIn](https://www.linkedin.com/in/ssreddy/)
 - Brandon Isaac Datch : [Github](https://github.com/Brandon-Isaac) / [LinkedIn](https://linkedin.com/in/isaac-datch-947067288)
-- Frank Jonas : [Github](https://github.com/Frank-128) / [LinkedIn](https://linkedin.com/in/fndagula)
+- Frank Ndagula : [GitHub](https://github.com/Frank-128) / [LinkedIn](https://www.linkedin.com/in/fndagula/)
 
   ...
 
