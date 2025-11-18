@@ -34,9 +34,8 @@ Everyone on your team should add their name along with a link to their GitHub
 your repo access and to practice PR'ing with your team _before_ you start
 coding!
 
-- Alexis Desani-Gono (Scrum Master) : [GitHub](https://github.com/TheLexinator) / [LinkedIn](https://www.linkedin.com/in/alexisdesanigono/)
-- Alexander Makoveev, Frontend Developer : [GitHub](https://github.com/Alexander-NM) / [LinkedIn](https://www.linkedin.com/in/alexander-makoveev)
 - Shruthi Reddy : [GitHub](https://github.com/shrusred) / [LinkedIn](https://www.linkedin.com/in/ssreddy/)
+- Brandon Isaac Datch : [Github](https://github.com/Brandon-Isaac) / [LinkedIn](https://linkedin.com/in/isaac-datch-947067288)
 - Frank Ndagula : [GitHub](https://github.com/Frank-128) / [LinkedIn](https://www.linkedin.com/in/fndagula/)
 
   ...
