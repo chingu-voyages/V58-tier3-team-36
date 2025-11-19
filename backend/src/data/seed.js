@@ -27,9 +27,9 @@ function normalizeEntry(rawEntry) {
     source: rawEntry.Source,
     roleType: rawEntry['Role Type'],
     voyageRole: rawEntry['Voyage Role'],
-    soloProjectTier: rawEntry['Solo Project Tier'] || 'N/A',
-    voyageTier: rawEntry['Voyage Tier'] || 'N/A',
-    voyage: rawEntry['Voyage (from Voyage Signups)'] || 'N/A',
+    soloProjectTier: rawEntry['Solo Project Tier'],
+    voyageTier: rawEntry['Voyage Tier'],
+    voyage: rawEntry['Voyage (from Voyage Signups)'],
   };
 }
 
