@@ -13,6 +13,7 @@ export default [
     rules: {
       ...prettierConfig.rules,
       "prettier/prettier": "error",
+      "next/core-web-vitals": "warn",
     },
   },
 ];
