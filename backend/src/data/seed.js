@@ -35,7 +35,7 @@ function normalizeEntry(rawEntry) {
 
 async function seedDatabase() {
   if (!MONGO_URI || MONGO_URI.includes('localhost') || MONGO_URI.includes('chingu_demographics')) {
-    console.warn(MONGO_URI);
+    console.warn(`Warning: Using local or test database URI: ${MONGO_URI}`);
   }
 
   try {
