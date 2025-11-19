@@ -46,7 +46,7 @@ coding!
 ### Running the Database Seed Script
 Follow these instructions to populate your local development database with initial data, such as demographics, using the seed script.
 
-### Seed Script Command
+#### Seed Script Command
 Use the following command to execute the seed script, which specifically populates demographics data:
 
 ```
