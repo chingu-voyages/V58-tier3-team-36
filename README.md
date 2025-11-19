@@ -41,3 +41,14 @@ coding!
   ...
 
 - Teammate name #n: [GitHub](https://github.com/ghaccountname) / [LinkedIn](https://linkedin.com/in/liaccountname)
+
+
+### Running the Database Seed Script
+Follow these instructions to populate your local development database with initial data, such as demographics, using the seed script.
+
+#### Seed Script Command
+Use the following command to execute the seed script, which specifically populates demographics data:
+
+```
+npm run seed:demographics
+```
