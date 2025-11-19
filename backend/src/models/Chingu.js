@@ -19,7 +19,7 @@ const ChinguSchema = new mongoose.Schema({
   countryCode: {
     type: String, // e.g., NZ, IN, US
     required: true,
-    index: true // Index for country-based map aggregation
+    index: true 
   },
   countryName: {
     type: String, // e.g., New Zealand, India
@@ -51,7 +51,7 @@ const ChinguSchema = new mongoose.Schema({
     type: String // e.g., V58
   },
 }, { 
-  timestamps: true // Adds createdAt and updatedAt automatically
+  timestamps: true
 });
 
 // Export the model
