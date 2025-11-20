@@ -179,22 +179,22 @@ export default function Home() {
           <div>
             <div className="flex items-center gap-x-3">
               <span className="w-4 h-4 rounded-full bg-[#079669] relative"></span>{" "}
-              <h1 className="font-semibold text-[#76808e]">
+              <span className="font-semibold text-[#76808e]">
                 Explain how filters work
-              </h1>
+              </span>
             </div>
             <div className="flex items-center gap-x-3">
               <span className="w-4 h-4 rounded-full bg-[#079669] relative"></span>{" "}
-              <h1 className="font-semibold text-[#76808e]">
+              <span className="font-semibold text-[#76808e]">
                 Guide you through the app
-              </h1>
+              </span>
             </div>
             <div className="flex items-center gap-x-3">
               <span className="w-4 h-4 rounded-full bg-[#079669] relative"></span>{" "}
-              <h1 className="font-semibold text-[#76808e]">
+              <span className="font-semibold text-[#76808e]">
                 Act as living documentation No manuals. No guessing. Just ask,
                 and go.
-              </h1>
+              </span>
             </div>
           </div>
         </div>
