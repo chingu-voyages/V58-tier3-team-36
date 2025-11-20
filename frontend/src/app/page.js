@@ -1,92 +1,206 @@
-import Link from 'next/link';
+"use client";
+import Image from "next/image";
+import { useEffect } from "react";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Map, List, TrendingUp } from 'lucide-react';
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
+  useEffect(() => {
+    const mm = gsap.matchMedia();
+
+    mm.add("(min-width: 1024px)", () => {
+      const wrapper = document.querySelector("#heroWrapper");
+      const img = document.querySelector("#heroImage");
+
+      if (!wrapper || !img) return;
+
+      ScrollTrigger.create({
+        trigger: "#heroWrapper",
+        start: "bottom center", // when bottom of wrapper hits center of viewport
+        onEnter: () => {
+          // Switch to row layout
+          gsap.to(wrapper, {
+            flexDirection: "row",
+            gap: "3rem",
+            duration: 0.5,
+            ease: "power2.out",
+          });
+          // Shrink image
+          gsap.to(img, {
+            scale: 0.6,
+            duration: 0.5,
+            ease: "power2.out",
+          });
+        },
+        onLeaveBack: () => {
+          // Back to column layout
+          gsap.to(wrapper, {
+            flexDirection: "column",
+            gap: "1.5rem",
+            duration: 0.5,
+            ease: "power2.out",
+          });
+          // Restore image size
+          gsap.to(img, {
+            scale: 1,
+            duration: 0.5,
+            ease: "power2.out",
+          });
+        },
+      });
+    });
+
+    return () => mm.revert();
+  }, []);
+
+  const filters = [
+    "Gender",
+    "Role",
+    "Role Type",
+    "Voyage tier",
+    "Voyage",
+    "Year of Join",
+  ];
+
   return (
-    <div className="space-y-10">
-      
-      {/* 1. HERO SECTION (12 Columns) */}
-      <Card className="bg-white p-8 sm:p-12 shadow-2xl border-2 border-[rgb(var(--color-chingublue))]/50">
-        <CardHeader className="p-0 mb-4">
-          <div className="flex items-center text-[rgb(var(--color-chingublue))] mb-2">
-            <Users className="w-8 h-8 mr-3" />
-            <CardTitle className="text-4xl font-extrabold text-[rgb(var(--color-chingutextblack))]">
-              Global Chingu Demographics
-            </CardTitle>
-          </div>
-          <CardDescription className="text-xl text-[rgb(var(--color-chingutextgrey))]">
-            Explore the geographical distribution and profile breakdown of Chingu Voyage members worldwide.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          
-          {/* Call to Action - Spans 12 columns on all sizes */}
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Link href="/map">
-              <Button size="lg" className="w-full bg-[rgb(var(--color-chingublue))] hover:bg-[rgb(var(--color-chingublue))]/90 text-white shadow-lg py-6 text-lg font-bold transition-all transform hover:scale-[1.01]">
-                <Map className="w-5 h-5 mr-2" /> View Interactive Map
-              </Button>
-            </Link>
-            <Link href="/list">
-              <Button size="lg" variant="secondary" className="w-full bg-[rgb(var(--color-chingumint))] hover:bg-[rgb(var(--color-chingumint))]/80 text-[rgb(var(--color-chingutextblack))] shadow-lg py-6 text-lg font-bold transition-all transform hover:scale-[1.01]">
-                <List className="w-5 h-5 mr-2" /> View Filterable List
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 2. INFORMATIONAL CARDS SECTION */}
-      <div className="grid grid-cols-12 gap-6">
-        
-        {/* Card 1: Map Explanation (Spans 12 columns on mobile, 6 on desktop) */}
-        <div className="col-span-12 lg:col-span-6">
-          <Card className="h-full bg-white shadow-lg border border-[rgb(var(--color-chingumint))]/50">
-            <CardHeader>
-              <div className="flex items-center text-[rgb(var(--color-chingublue))]">
-                <Map className="w-5 h-5 mr-2" />
-                <CardTitle>Map View</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="text-[rgb(var(--color-chingutextgrey))]">
-              The map provides a visual overview with pins representing country centroids. Each pin displays the count of Chingus originating from that country. Filters are applied in real-time to adjust the displayed counts.
-            </CardContent>
-          </Card>
+    <section id="heroSection" className="min-h-screen text-center space-y-3.5">
+      <div
+        id="heroWrapper"
+        className="flex flex-col lg:items-center items-center justify-center min-h-screen gap-6 px-6"
+      >
+        <div className="space-y-3 text-center lg:text-left">
+          <h1 className="sm:text-5xl text-3xl font-bold text-[#079669]">
+            Discover your Global Chingu Community!
+          </h1>
+          <h2 className="sm:text-3xl text-xl font-bold text-[#079669]/60">
+            a global map of Chingu talent
+          </h2>
+          <h3 className="sm:text-2xl text-lg font-normal text-[#76808e]">
+            See where Chingu lives, what they do and how they collaborate across
+            timezones
+          </h3>
         </div>
 
-        {/* Card 2: List Explanation (Spans 12 columns on mobile, 6 on desktop) */}
-        <div className="col-span-12 lg:col-span-6">
-          <Card className="h-full bg-white shadow-lg border border-[rgb(var(--color-chingumint))]/50">
-            <CardHeader>
-              <div className="flex items-center text-[rgb(var(--color-chingublue))]">
-                <List className="w-5 h-5 mr-2" />
-                <CardTitle>List View & Filtering</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="text-[rgb(var(--color-chingutextgrey))]">
-              The List view presents raw demographic data in a clean, paginated table. Utilize the shared search component to filter records by Role Type, Voyage Tier, Year of Joining, and other criteria.
-            </CardContent>
-          </Card>
+        <div className="pt-6 shrink-0">
+          <Image
+            id="heroImage"
+            src="/images/globe.png"
+            width={400}
+            height={400}
+            alt="globe"
+            className="rounded-lg"
+          />
         </div>
-        
-        {/* Card 3: Technology Stack (Full 12 columns on desktop) */}
-        <div className="col-span-12">
-           <Card className="bg-[rgb(var(--color-chingumint))]/40 shadow-inner border border-[rgb(var(--color-chingumint))] h-full">
-            <CardHeader>
-              <div className="flex items-center text-[rgb(var(--color-chingutextblack))]">
-                <TrendingUp className="w-5 h-5 mr-2" />
-                <CardTitle>Tech Stack & Future Goals</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="text-[rgb(var(--color-chingutextgrey))]/90">
-              Built on Next.js, Express, and MongoDB, this app is designed for scalability. Future features include Google Authentication (complete) and an integrated Gemini AI Chatbot.
-            </CardContent>
-          </Card>
-        </div>
-
       </div>
-    </div>
+
+      <div className="translate-y-10 flex gap-6 my-8 justify-center">
+        <Link href='/map' className="px-8 py-4 bg-[#079669] text-white font-semibold rounded-full hover:bg-[#068055] transition shadow-lg cursor-pointer">
+          View Map
+        </Link>
+        <Link href='/list' className="px-8 py-4 border-2 border-[#079669] text-[#079669] font-semibold rounded-full hover:bg-emerald-50 transition cursor-pointer">
+          View List
+        </Link>
+      </div>
+
+      <div className="p-6 space-y-16">
+        <div className="space-y-4 place-items-center">
+          <h1 className="text-4xl font-bold ">
+            See your global community come to life.
+          </h1>
+          <h3 className="text-xl text-[#76808e]">
+            Meet the Chingus who make up our global developer village.
+            <br /> Explore where they live, what roles they play, and how
+            diverse our community really is.
+          </h3>
+          <Image
+            src={"/images/community.png"}
+            width={400}
+            height={400}
+            alt="community"
+            className="object-cover bg-white-500"
+          />
+        </div>
+
+        <div className="space-y-4 place-items-center">
+          <h1 className="text-4xl font-bold text-[#079669]">
+            Understand the Chingu ecosystem at a glance!
+          </h1>
+          <h3 className="text-xl text-[#76808e]">
+            Get a clear picture of the skills, tiers, and journeys of Chingus
+            across the world, <br />
+            from beginners to senior devs, designers, data scientists, and
+            everyone in between.
+          </h3>
+          <Image
+            src={"/images/logo.png"}
+            width={200}
+            height={200}
+            className="animate-spin animation-duration-2000"
+            alt="logo"
+          />
+        </div>
+        <div className="space-y-4 place-items-center">
+          <h1 className="text-4xl font-bold">Search smarter!</h1>
+          <h3 className="text-xl text-[#76808e]">
+            Use powerful filters to explore
+          </h3>
+          <div className="flex justify-around gap-3 flex-wrap">
+            {filters.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-x-3">
+                <span className="w-4 h-4 rounded-full bg-[#079669] relative"></span>{" "}
+                <span className="font-semibold text-[#76808e]">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-4 place-items-center">
+          <h1 className="text-4xl font-bold text-[#079669]">Map and List</h1>
+          <h3 className="text-xl text-[#76808e]">
+            Switch between a geographic view and a detailed list view, <br /> in
+            order to explore the data the way that makes sense for you.
+          </h3>
+          <div className="translate-y-10 flex gap-6 my-8 justify-center">
+            <Link href='/map' className="px-8 py-4 bg-[#079669] text-white font-semibold rounded-full hover:bg-[#068055] transition shadow-lg cursor-pointer">
+              View Map
+            </Link>
+            <Link href='/list' className="px-8 py-4 border-2 border-[#079669] text-[#079669] font-semibold rounded-full hover:bg-emerald-50 transition cursor-pointer rounded-full">
+              View List
+            </Link>
+          </div>
+        </div>
+        <div className="space-y-4 place-items-center">
+          <h1 className="text-4xl font-bold ">AI at Your Side</h1>
+          <h3 className="text-xl text-[#76808e]">
+            A built-in AI helper is ready to answer questions:
+          </h3>
+          <div>
+            <div className="flex items-center gap-x-3">
+              <span className="w-4 h-4 rounded-full bg-[#079669] relative"></span>{" "}
+              <span className="font-semibold text-[#76808e]">
+                Explain how filters work
+              </span>
+            </div>
+            <div className="flex items-center gap-x-3">
+              <span className="w-4 h-4 rounded-full bg-[#079669] relative"></span>{" "}
+              <span className="font-semibold text-[#76808e]">
+                Guide you through the app
+              </span>
+            </div>
+            <div className="flex items-center gap-x-3">
+              <span className="w-4 h-4 rounded-full bg-[#079669] relative"></span>{" "}
+              <span className="font-semibold text-[#76808e]">
+                Act as living documentation No manuals. No guessing. Just ask,
+                and go.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
