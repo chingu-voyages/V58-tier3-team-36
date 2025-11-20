@@ -6,6 +6,8 @@ const config = {
     "./app/**/*.{js,jsx}",
     "./src/**/*.{js,jsx}",
   ],
+    theme: {},
+  plugins: [],
 };
 
 module.exports = config;
