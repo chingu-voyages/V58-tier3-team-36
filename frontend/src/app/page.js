@@ -151,7 +151,7 @@ export default function Home() {
             {filters.map((item, idx) => (
               <div key={idx} className="flex items-center gap-x-3">
                 <span className="w-4 h-4 rounded-full bg-[#079669] relative"></span>{" "}
-                <h1 className="font-semibold text-[#76808e]">{item}</h1>
+                <span className="font-semibold text-[#76808e]">{item}</span>
               </div>
             ))}
           </div>
