@@ -126,7 +126,7 @@ export default function Home() {
 
         <div className="space-y-4 place-items-center">
           <h1 className="text-4xl font-bold text-[#079669]">
-            Understand the Chingu ecosystem at glance!
+            Understand the Chingu ecosystem at a glance!
           </h1>
           <h3 className="text-xl text-[#76808e]">
             Get a clear picture of the skills, tiers, and journeys of Chingus
