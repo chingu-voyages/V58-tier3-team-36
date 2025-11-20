@@ -4,16 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
-import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const pathname = usePathname();
-
   const closeMobileMenu = () => setIsMenuOpen(false);
-  const isHomePage = pathname === '/';
 
   return (
     <header className="sticky top-0 z-50 w-full shadow-lg bg-white/95 backdrop-blur-sm border-b border-brand-mint">

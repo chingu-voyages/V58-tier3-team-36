@@ -24,12 +24,12 @@ export default function Home() {
           
           {/* Call to Action - Spans 12 columns on all sizes */}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Link href="/map" passHref>
+            <Link href="/map">
               <Button size="lg" className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white shadow-lg py-6 text-lg font-bold transition-all transform hover:scale-[1.01]">
                 <Map className="w-5 h-5 mr-2" /> View Interactive Map
               </Button>
             </Link>
-            <Link href="/list" passHref>
+            <Link href="/list">
               <Button size="lg" variant="secondary" className="w-full bg-brand-mint hover:bg-brand-mint/80 text-brand-textBlack shadow-lg py-6 text-lg font-bold transition-all transform hover:scale-[1.01]">
                 <List className="w-5 h-5 mr-2" /> View Filterable List
               </Button>
