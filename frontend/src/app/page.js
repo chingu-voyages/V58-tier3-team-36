@@ -8,15 +8,15 @@ export default function Home() {
     <div className="space-y-10">
       
       {/* 1. HERO SECTION (12 Columns) */}
-      <Card className="bg-white p-8 sm:p-12 shadow-2xl border-2 border-brand-blue/50">
+      <Card className="bg-white p-8 sm:p-12 shadow-2xl border-2 border-[rgb(var(--color-chingublue))]/50">
         <CardHeader className="p-0 mb-4">
-          <div className="flex items-center text-brand-blue mb-2">
+          <div className="flex items-center text-[rgb(var(--color-chingublue))] mb-2">
             <Users className="w-8 h-8 mr-3" />
-            <CardTitle className="text-4xl font-extrabold text-brand-textBlack">
+            <CardTitle className="text-4xl font-extrabold text-[rgb(var(--color-chingutextblack))]">
               Global Chingu Demographics
             </CardTitle>
           </div>
-          <CardDescription className="text-xl text-chingutextgrey">
+          <CardDescription className="text-xl text-[rgb(var(--color-chingutextgrey))]">
             Explore the geographical distribution and profile breakdown of Chingu Voyage members worldwide.
           </CardDescription>
         </CardHeader>
@@ -25,12 +25,12 @@ export default function Home() {
           {/* Call to Action - Spans 12 columns on all sizes */}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link href="/map">
-              <Button size="lg" className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white shadow-lg py-6 text-lg font-bold transition-all transform hover:scale-[1.01]">
+              <Button size="lg" className="w-full bg-[rgb(var(--color-chingublue))] hover:bg-[rgb(var(--color-chingublue))]/90 text-white shadow-lg py-6 text-lg font-bold transition-all transform hover:scale-[1.01]">
                 <Map className="w-5 h-5 mr-2" /> View Interactive Map
               </Button>
             </Link>
             <Link href="/list">
-              <Button size="lg" variant="secondary" className="w-full bg-brand-mint hover:bg-brand-mint/80 text-brand-textBlack shadow-lg py-6 text-lg font-bold transition-all transform hover:scale-[1.01]">
+              <Button size="lg" variant="secondary" className="w-full bg-[rgb(var(--color-chingumint))] hover:bg-[rgb(var(--color-chingumint))]/80 text-[rgb(var(--color-chingutextblack))] shadow-lg py-6 text-lg font-bold transition-all transform hover:scale-[1.01]">
                 <List className="w-5 h-5 mr-2" /> View Filterable List
               </Button>
             </Link>
@@ -43,14 +43,14 @@ export default function Home() {
         
         {/* Card 1: Map Explanation (Spans 12 columns on mobile, 6 on desktop) */}
         <div className="col-span-12 lg:col-span-6">
-          <Card className="h-full bg-white shadow-lg border border-brand-mint/50">
+          <Card className="h-full bg-white shadow-lg border border-[rgb(var(--color-chingumint))]/50">
             <CardHeader>
-              <div className="flex items-center text-brand-blue">
+              <div className="flex items-center text-[rgb(var(--color-chingublue))]">
                 <Map className="w-5 h-5 mr-2" />
                 <CardTitle>Map View</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="text-chingutextgrey">
+            <CardContent className="text-[rgb(var(--color-chingutextgrey))]">
               The map provides a visual overview with pins representing country centroids. Each pin displays the count of Chingus originating from that country. Filters are applied in real-time to adjust the displayed counts.
             </CardContent>
           </Card>
@@ -58,14 +58,14 @@ export default function Home() {
 
         {/* Card 2: List Explanation (Spans 12 columns on mobile, 6 on desktop) */}
         <div className="col-span-12 lg:col-span-6">
-          <Card className="h-full bg-white shadow-lg border border-brand-mint/50">
+          <Card className="h-full bg-white shadow-lg border border-[rgb(var(--color-chingumint))]/50">
             <CardHeader>
-              <div className="flex items-center text-brand-blue">
+              <div className="flex items-center text-[rgb(var(--color-chingublue))]">
                 <List className="w-5 h-5 mr-2" />
                 <CardTitle>List View & Filtering</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="text-chingutextgrey">
+            <CardContent className="text-[rgb(var(--color-chingutextgrey))]">
               The List view presents raw demographic data in a clean, paginated table. Utilize the shared search component to filter records by Role Type, Voyage Tier, Year of Joining, and other criteria.
             </CardContent>
           </Card>
@@ -73,14 +73,14 @@ export default function Home() {
         
         {/* Card 3: Technology Stack (Full 12 columns on desktop) */}
         <div className="col-span-12">
-           <Card className="bg-brand-mint/40 shadow-inner border border-brand-mint h-full">
+           <Card className="bg-[rgb(var(--color-chingumint))]/40 shadow-inner border border-[rgb(var(--color-chingumint))] h-full">
             <CardHeader>
-              <div className="flex items-center text-brand-textBlack">
+              <div className="flex items-center text-[rgb(var(--color-chingutextblack))]">
                 <TrendingUp className="w-5 h-5 mr-2" />
                 <CardTitle>Tech Stack & Future Goals</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="text-chingutextblack/90">
+            <CardContent className="text-[rgb(var(--color-chingutextgrey))]/90">
               Built on Next.js, Express, and MongoDB, this app is designed for scalability. Future features include Google Authentication (complete) and an integrated Gemini AI Chatbot.
             </CardContent>
           </Card>

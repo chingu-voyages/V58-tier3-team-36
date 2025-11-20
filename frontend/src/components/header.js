@@ -12,7 +12,7 @@ export default function Header() {
   const closeMobileMenu = () => setIsMenuOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full shadow-lg bg-white/95 backdrop-blur-sm border-b border-brand-mint">
+    <header className="sticky top-0 z-50 w-full shadow-lg bg-white/95 backdrop-blur-sm border-b border-[rgb(var(--color-chingumint))]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* TOP ROW: Logo, Nav, Auth, Menu Toggle */}
@@ -27,7 +27,7 @@ export default function Header() {
               height={32} 
               className="rounded-full"
             />
-            <h1 className="text-xl font-extrabold text-brand-blue hidden sm:block">Demographics Explorer</h1>
+            <h1 className="text-xl font-extrabold text-[rgb(var(--color-chingublue))] hidden sm:block">Demographics Explorer</h1>
           </Link>
 
           {/* Desktop Navigation */}
@@ -42,7 +42,7 @@ export default function Header() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="md:hidden text-brand-blue"
+              className="md:hidden text-[rgb(var(--color-chingublue))]"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-expanded={isMenuOpen}
               aria-controls="mobile-menu"
@@ -53,13 +53,13 @@ export default function Header() {
         </div>
 
         {/* Mobile Dropdown Menu */}
-        <div id="mobile-menu" className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'} bg-white shadow-inner border-t border-brand-mint/50 p-4`}>
+        <div id="mobile-menu" className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'} bg-white shadow-inner border-t border-[rgb(var(--color-chingumint))]/50 p-4`}>
           <div className="flex flex-col space-y-2">
             
             {/* Mobile Navigation */}
             <Navigation isMobile={true} closeMenu={closeMobileMenu} />
 
-            <div className="pt-4 border-t mt-4 border-brand-mint/50">
+            <div className="pt-4 border-t mt-4 border-[rgb(var(--color-chingumint))]/50">
             </div>
           </div>
         </div>
