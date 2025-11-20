@@ -166,9 +166,9 @@ export default function Home() {
             <Link href='/map' className="px-8 py-4 bg-[#079669] text-white font-semibold rounded-full hover:bg-[#068055] transition shadow-lg cursor-pointer">
               View Map
             </Link>
-            <button href='/list' className="px-8 py-4 border-2 border-[#079669] text-[#079669] font-semibold rounded-full hover:bg-emerald-50 transition cursor-pointer">
+            <Link href='/list' className="px-8 py-4 border-2 border-[#079669] text-[#079669] font-semibold rounded-full hover:bg-emerald-50 transition cursor-pointer rounded-full">
               View List
-            </button>
+            </Link>
           </div>
         </div>
         <div className="space-y-4 place-items-center">
