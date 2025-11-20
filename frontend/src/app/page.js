@@ -79,7 +79,7 @@ export default function Home() {
             a global map of Chingu talent
           </h2>
           <h3 className="sm:text-2xl text-lg font-normal text-[#76808e]">
-            See where chingu lives, what they do and how they collaborate across
+            See where Chingu lives, what they do and how they collaborate across
             timezones
           </h3>
         </div>
