@@ -7,7 +7,7 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'www.chingu.io',
         port: '',
-        pathname: '/logo-with-text-192.png', 
+        pathname: '/**', 
       },
     ],
   },

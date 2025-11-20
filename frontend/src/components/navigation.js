@@ -22,7 +22,6 @@ export default function Navigation({ isMobile = false, closeMenu }) {
         <Link 
           key={link.href} 
           href={link.href} 
-          passHref 
           onClick={isMobile ? closeMenu : undefined}
         >
           <Button
