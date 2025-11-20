@@ -1,4 +1,5 @@
 import React from 'react';
+import { Github } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -22,6 +23,7 @@ export default function Footer() {
           rel="noopener noreferrer"
           className="flex items-center space-x-1 text-brand-mint hover:text-white transition-colors font-medium group"
         >
+          <Github className="w-4 h-4 mr-1 group-hover:scale-110 transition-transform" />
           <span>View Team Git</span>
         </a>
       </div>

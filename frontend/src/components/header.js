@@ -1,20 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image"; 
+import Image from "next/image";
 import Navigation from "@/components/navigation";
+import { Button } from "@/components/ui/button";
+import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+
   const closeMobileMenu = () => setIsMenuOpen(false);
+  const isHomePage = pathname === '/';
 
   return (
     <header className="sticky top-0 z-50 w-full shadow-lg bg-white/95 backdrop-blur-sm border-b border-brand-mint">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* TOP ROW: Logo, Nav, Auth, Menu Toggle */}
         <div className="flex justify-between items-center h-16">
-
+          
+          {/* Logo and App Name */}
           <Link href="/" className="flex items-center space-x-3 transition-opacity hover:opacity-80">
             <Image 
               src="https://www.chingu.io/logo-with-text-192.png" 
@@ -35,7 +43,7 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             <div className="hidden md:block">
             </div>
-            <span
+            <Button 
               variant="ghost" 
               size="icon" 
               className="md:hidden text-brand-blue"
@@ -44,7 +52,7 @@ export default function Header() {
               aria-controls="mobile-menu"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </span>
+            </Button>
           </div>
         </div>
 

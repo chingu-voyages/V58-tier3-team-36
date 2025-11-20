@@ -1,15 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { usePathname } from 'next/navigation';
 
 // Define the navigation links
 const navLinks = [
   { href: "/", label: "Home" },
+  { href: "/map", label: "Map" },
+  { href: "/list", label: "List" },
 ];
 
 export default function Navigation({ isMobile = false, closeMenu }) {
-  const pathname = usePathname();  
+  const pathname = usePathname();
+  
   const baseClasses = "font-semibold transition-colors rounded-lg";
   
   return (
@@ -21,7 +25,7 @@ export default function Navigation({ isMobile = false, closeMenu }) {
           passHref 
           onClick={isMobile ? closeMenu : undefined}
         >
-          <span
+          <Button
             variant="ghost"
             className={`
               ${isMobile ? 'w-full justify-start text-lg py-3' : 'px-4 py-2 text-base'}
@@ -37,7 +41,7 @@ export default function Navigation({ isMobile = false, closeMenu }) {
             `}
           >
             {link.label}
-          </span>
+          </Button>
         </Link>
       ))}
     </nav>
