@@ -1,36 +1,41 @@
 require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
 const mongoose = require('mongoose');
 const Chingu = require('../models/Chingu'); 
 
 
 const MONGO_URI = process.env.MONGO_URI;
-const RAW_DATA_PATH = path.join(__dirname, 'chingu_demographics.json');
+const CHINGU_DEMOGRAPHICS_DATA = "https://raw.githubusercontent.com/chingu-voyages/voyage-project-chingu-map/refs/heads/main/src/assets/chingu_info.json"
 
 function normalizeEntry(rawEntry) {
-  const timestamp = new Date(rawEntry.Timestamp);
+  let timestamp = new Date(rawEntry.Timestamp);
   
-  // Guard against invalid dates
-  if (isNaN(timestamp.getTime())) {
-    console.error(`Skipping entry due to invalid Timestamp: ${rawEntry.Timestamp}`);
-    return null;
+  // Handle empty or invalid timestamps with default year 2010
+  if (!rawEntry.Timestamp || isNaN(timestamp.getTime())) {
+    timestamp = new Date('2010-01-01');
   }
 
   return {
     timestamp,
     yearJoined: timestamp.getFullYear(),
-    gender: rawEntry.Gender,
-    countryCode: rawEntry['Country Code'],
-    countryName: rawEntry['Country name (from Country)'],
-    goal: rawEntry.Goal,
-    source: rawEntry.Source,
-    roleType: rawEntry['Role Type'],
-    voyageRole: rawEntry['Voyage Role'],
-    soloProjectTier: rawEntry['Solo Project Tier'],
-    voyageTier: rawEntry['Voyage Tier'],
-    voyage: rawEntry['Voyage (from Voyage Signups)'],
+    gender: rawEntry.Gender || 'N/A',
+    countryCode: rawEntry['Country Code'] || 'N/A',
+    countryName: rawEntry['Country name (from Country)'] || 'N/A',
+    goal: rawEntry.Goal || 'N/A',
+    source: rawEntry.Source || 'N/A',
+    roleType: rawEntry['Role Type'] || 'N/A',
+    voyageRole: rawEntry['Voyage Role'] || 'N/A',
+    soloProjectTier: rawEntry['Solo Project Tier'] || 'N/A',
+    voyageTier: rawEntry['Voyage Tier'] || 'N/A',
+    voyage: rawEntry['Voyage (from Voyage Signups)'] || 'N/A',
   };
+}
+
+async function fetchData() {
+  const response = await fetch(CHINGU_DEMOGRAPHICS_DATA);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch data: ${response.statusText}`);
+  }
+  return await response.json();
 }
 
 async function seedDatabase() {
@@ -44,13 +49,12 @@ async function seedDatabase() {
     await mongoose.connect(MONGO_URI);
     console.log('✅ MongoDB connected successfully.');
 
-    // Read and parse the raw JSON data
-    console.log(`Reading data from: ${RAW_DATA_PATH}`);
-    const rawData = fs.readFileSync(RAW_DATA_PATH, 'utf-8');
-    const rawEntries = JSON.parse(rawData);
+    // Fetch and parse the remote JSON data
+    console.log(`Fetching data from: ${CHINGU_DEMOGRAPHICS_DATA}`);
+    const rawEntries = await fetchData();
     console.log(`Found ${rawEntries.length} raw entries.`);
 
-    //Normalize the data
+    // Normalize the data
     const normalizedEntries = rawEntries
       .map(normalizeEntry)
       .filter(entry => entry !== null);
@@ -78,7 +82,7 @@ async function seedDatabase() {
     }
     process.exit(1); 
   } finally {
-        await mongoose.disconnect();
+    await mongoose.disconnect();
     console.log('Disconnected from MongoDB.');
   }
 }
