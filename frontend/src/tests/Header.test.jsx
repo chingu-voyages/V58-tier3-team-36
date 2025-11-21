@@ -2,12 +2,16 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Header from '@/components/header';
 
-// Mock Next.js hooks and components that Header relies on
+// Mock Next.js hooks, components, and lucide-react icons that Header relies on
 jest.mock('next/navigation', () => ({
   usePathname: () => '/',
 }));
-jest.mock('next/image', () => ( props ) => <img {...props} />);
+jest.mock('next/image', () => ({ src, alt }) => <img src={src} alt={alt} />);
 jest.mock('@/components/navigation', () => () => <nav data-testid="nav-mock">Navigation</nav>);
+jest.mock('lucide-react', () => ({
+  Menu: () => <span data-testid="icon-menu">MenuIcon</span>,
+  X: () => <span data-testid="icon-x">XIcon</span>,
+}));
 
 // Define accessible names for the toggle buttons
 const OPEN_MENU_NAME = /open navigation menu/i; 
