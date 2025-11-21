@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Footer from '@/components/footer';
 
-// Mock Next.js hooks and components that Footer relies on
+// Mock Next.js icons that Footer relies on
 jest.mock('lucide-react', () => ({
   Github: () => <svg data-testid="github-icon" />,
 }));
