@@ -31,11 +31,22 @@ function normalizeEntry(rawEntry) {
 }
 
 async function fetchData() {
-  const response = await fetch(CHINGU_DEMOGRAPHICS_DATA);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch data: ${response.statusText}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+  try {
+    const response = await fetch(CHINGU_DEMOGRAPHICS_DATA, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout: Failed to fetch data within 30 seconds');
+    }
+    throw error;
   }
-  return await response.json();
 }
 
 async function seedDatabase() {
