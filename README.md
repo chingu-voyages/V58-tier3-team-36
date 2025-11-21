@@ -45,6 +45,9 @@ coding!
 
 ### Running the Database Seed Script
 Follow these instructions to populate your local development database with initial data, such as demographics, using the seed script.
+- Node Version required to run the seeding should be >18
+- NB: Invalid Timestamp returns a default of 01-01-2010
+- Empty fields default to N/A
 
 #### Seed Script Command
 Use the following command to execute the seed script, which specifically populates demographics data:
