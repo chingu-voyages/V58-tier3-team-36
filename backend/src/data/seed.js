@@ -4,7 +4,7 @@ const Chingu = require('../models/Chingu');
 
 
 const MONGO_URI = process.env.MONGO_URI;
-const CHINGU_DEMOGRAPHICS_DATA = "https://raw.githubusercontent.com/chingu-voyages/voyage-project-chingu-map/refs/heads/main/src/assets/chingu_info.json"
+const CHINGU_DEMOGRAPHICS_DATA = "https://raw.githubusercontent.com/chingu-voyages/voyage-project-chingu-map/refs/heads/main/src/assets/chingu_info.json";
 
 function normalizeEntry(rawEntry) {
   let timestamp = new Date(rawEntry.Timestamp);
