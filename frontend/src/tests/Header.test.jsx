@@ -6,7 +6,7 @@ import Header from '@/components/header';
 jest.mock('next/navigation', () => ({
   usePathname: () => '/',
 }));
-jest.mock('next/image', () => ({ src, alt }) => <img src={src} alt={alt} />);
+jest.mock('next/image', () => ( props ) => <img {...props} />);
 jest.mock('@/components/navigation', () => () => <nav data-testid="nav-mock">Navigation</nav>);
 
 // Define accessible names for the toggle buttons
