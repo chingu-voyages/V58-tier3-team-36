@@ -7,7 +7,7 @@ const {
 } = require('../controllers/memberController'); 
 
 router.get('/aggregate-by-country', aggregateByCountry);
-router.get("/", getChingus);
+router.get('/', getChingus);
 
 
 module.exports = router;
