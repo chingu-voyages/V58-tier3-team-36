@@ -1,5 +1,9 @@
 const Chingu = require('../models/Chingu');
 
+// Escape regex special characters to prevent ReDoS & regex injection
+const escapeRegex = (str) =>
+  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const aggregateByCountry = async (req, res) => {
   try {
     const {
@@ -9,20 +13,34 @@ const aggregateByCountry = async (req, res) => {
       role,
       soloProjectTier,
       voyageTier,
-      voyage,
+      voyage,       
       yearJoined,
     } = req.query;
 
     const matchQuery = {};
 
-    // Fuzzy search
-    if (country) matchQuery.countryName = { $regex: country, $options: "i" };
-    if (gender) matchQuery.gender = { $regex: gender, $options: "i" };
-    if (roleType) matchQuery.roleType = { $regex: roleType, $options: "i" };
-    if (role) matchQuery.role = { $regex: role, $options: "i" };
-    if (soloProjectTier) matchQuery.soloProjectTier = { $regex: soloProjectTier, $options: "i" };
-    if (voyageTier) matchQuery.voyageTier = { $regex: voyageTier, $options: "i" };
-    if (voyage) matchQuery.voyage = { $regex: voyage, $options: "i" };
+    // SAFE fuzzy searches
+    if (country)
+      matchQuery.countryName = { $regex: escapeRegex(country), $options: "i" };
+    if (gender)
+      matchQuery.gender = { $regex: escapeRegex(gender), $options: "i" };
+    if (roleType)
+      matchQuery.roleType = { $regex: escapeRegex(roleType), $options: "i" };
+    if (role)
+      matchQuery.role = { $regex: escapeRegex(role), $options: "i" };
+    if (soloProjectTier)
+      matchQuery.soloProjectTier = {
+        $regex: escapeRegex(soloProjectTier),
+        $options: "i",
+      };
+    if (voyageTier)
+      matchQuery.voyageTier = {
+        $regex: escapeRegex(voyageTier),
+        $options: "i",
+      };
+
+    //  Voyage should be an exact match like "V58"
+    if (voyage) matchQuery.voyage = voyage;
 
     // Exact numeric match
     if (yearJoined) matchQuery.yearJoined = Number(yearJoined);
@@ -32,17 +50,17 @@ const aggregateByCountry = async (req, res) => {
       {
         $group: {
           _id: "$countryName",
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
       {
         $project: {
           _id: 0,
           countryName: "$_id",
-          count: 1
-        }
+          count: 1,
+        },
       },
-      { $sort: { count: -1 } }
+      { $sort: { count: -1 } },
     ]);
 
     return res.json(result);
@@ -51,7 +69,6 @@ const aggregateByCountry = async (req, res) => {
     return res.status(500).json({ message: "Server error during aggregation" });
   }
 };
-
 
 const getChingus = async (req, res) => {
   try {
@@ -62,40 +79,55 @@ const getChingus = async (req, res) => {
       role,
       soloProjectTier,
       voyageTier,
-      voyage,
+      voyage,       // exact match
       yearJoined,
       page = 1,
       limit = 20,
       sort = "-timestamp",
     } = req.query;
 
+    //  Pagination validation
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, Number(limit) || 20)); // cap at 100
+
     const query = {};
 
-    // Fuzzy searches
-    if (country) query.countryName = { $regex: country, $options: "i" };
-    if (gender) query.gender = { $regex: gender, $options: "i" };
-    if (roleType) query.roleType = { $regex: roleType, $options: "i" };
-    if (role) query.role = { $regex: role, $options: "i" };
-    if (soloProjectTier) query.soloProjectTier = { $regex: soloProjectTier, $options: "i" };
-    if (voyageTier) query.voyageTier = { $regex: voyageTier, $options: "i" };
-    if (voyage) query.voyage = { $regex: voyage, $options: "i" };
+    // SAFE fuzzy searches
+    if (country)
+      query.countryName = { $regex: escapeRegex(country), $options: "i" };
+    if (gender)
+      query.gender = { $regex: escapeRegex(gender), $options: "i" };
+    if (roleType)
+      query.roleType = { $regex: escapeRegex(roleType), $options: "i" };
+    if (role)
+      query.role = { $regex: escapeRegex(role), $options: "i" };
+    if (soloProjectTier)
+      query.soloProjectTier = {
+        $regex: escapeRegex(soloProjectTier),
+        $options: "i",
+      };
+    if (voyageTier)
+      query.voyageTier = { $regex: escapeRegex(voyageTier), $options: "i" };
+
+    // ❗ Exact match recommended for voyage IDs
+    if (voyage) query.voyage = voyage;
 
     // Exact numeric match
     if (yearJoined) query.yearJoined = Number(yearJoined);
 
-    // Pagination parameters
-    const skip = (page - 1) * limit;
+    // Pagination
+    const skip = (pageNum - 1) * limitNum;
 
     const [data, total] = await Promise.all([
-      Chingu.find(query).sort(sort).skip(skip).limit(Number(limit)),
+      Chingu.find(query).sort(sort).skip(skip).limit(limitNum),
       Chingu.countDocuments(query),
     ]);
 
     return res.json({
-      page: Number(page),
-      limit: Number(limit),
+      page: pageNum,
+      limit: limitNum,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / limitNum),
       data,
     });
   } catch (error) {
@@ -104,8 +136,7 @@ const getChingus = async (req, res) => {
   }
 };
 
-
 module.exports = {
   aggregateByCountry,
-  getChingus
+  getChingus,
 };

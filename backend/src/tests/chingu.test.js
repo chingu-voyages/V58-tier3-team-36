@@ -1,8 +1,11 @@
-// tests/chingu.test.js
 const request = require("supertest");
 const express = require("express");
 
-// Mock Chingu BEFORE importing controller
+// Re-create the same escapeRegex used in controller
+const escapeRegex = (str) =>
+  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Mock Chingu BEFORE controller import
 jest.mock("../models/Chingu", () => ({
   find: jest.fn(),
   countDocuments: jest.fn(),
@@ -11,7 +14,6 @@ jest.mock("../models/Chingu", () => ({
 const Chingu = require("../models/Chingu");
 const { getChingus } = require("../controllers/memberController");
 
-// Fake express app
 const app = express();
 app.get("/api/chingus", getChingus);
 
@@ -20,9 +22,9 @@ describe("GET /api/chingus", () => {
     jest.clearAllMocks();
   });
 
-  // -------------------------
-  // PAGINATION
-  // -------------------------
+  // ---------------------------
+  // PAGINATION TEST
+  // ---------------------------
   test("should return paginated results", async () => {
     Chingu.find.mockReturnValue({
       sort: () => ({
@@ -43,147 +45,44 @@ describe("GET /api/chingus", () => {
     expect(res.body.totalPages).toBe(10);
   });
 
-  // -------------------------
+  // ---------------------------
   // FUZZY FILTERS
-  // -------------------------
+  // ---------------------------
+  const fuzzyFields = [
+  { key: "country", mongo: "countryName" },
+  { key: "gender", mongo: "gender" },
+  { key: "roleType", mongo: "roleType" },
+  { key: "role", mongo: "role" },
+  { key: "soloProjectTier", mongo: "soloProjectTier" },
+  { key: "voyageTier", mongo: "voyageTier" },
+];
 
-  test("should apply fuzzy search for country", async () => {
-    Chingu.find.mockReturnValue({
-      sort: () => ({
-        skip: () => ({
-          limit: () => [],
+
+  fuzzyFields.forEach(({ key, mongo }) => {
+    test(`should apply fuzzy search for ${key}`, async () => {
+      Chingu.find.mockReturnValue({
+        sort: () => ({
+          skip: () => ({
+            limit: () => [],
+          }),
         }),
-      }),
+      });
+      Chingu.countDocuments.mockResolvedValue(0);
+
+      const input = "v42";
+      await request(app).get(`/api/chingus?${key}=${input}`);
+
+      expect(Chingu.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [mongo]: { $regex: escapeRegex(input), $options: "i" },
+        })
+      );
     });
-    Chingu.countDocuments.mockResolvedValue(0);
-
-    await request(app).get("/api/chingus?country=ind");
-
-    expect(Chingu.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        countryName: { $regex: "ind", $options: "i" },
-      })
-    );
   });
 
-  test("should apply fuzzy search for gender", async () => {
-    Chingu.find.mockReturnValue({
-      sort: () => ({
-        skip: () => ({
-          limit: () => [],
-        }),
-      }),
-    });
-    Chingu.countDocuments.mockResolvedValue(0);
-
-    await request(app).get("/api/chingus?gender=fe");
-
-    expect(Chingu.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        gender: { $regex: "fe", $options: "i" },
-      })
-    );
-  });
-
-  test("should apply fuzzy search for roleType", async () => {
-    Chingu.find.mockReturnValue({
-      sort: () => ({
-        skip: () => ({
-          limit: () => [],
-        }),
-      }),
-    });
-    Chingu.countDocuments.mockResolvedValue(0);
-
-    await request(app).get("/api/chingus?roleType=dev");
-
-    expect(Chingu.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        roleType: { $regex: "dev", $options: "i" },
-      })
-    );
-  });
-
-  test("should apply fuzzy search for role", async () => {
-    Chingu.find.mockReturnValue({
-      sort: () => ({
-        skip: () => ({
-          limit: () => [],
-        }),
-      }),
-    });
-    Chingu.countDocuments.mockResolvedValue(0);
-
-    await request(app).get("/api/chingus?role=frontend");
-
-    expect(Chingu.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        role: { $regex: "frontend", $options: "i" },
-      })
-    );
-  });
-
-  test("should apply fuzzy search for soloProjectTier", async () => {
-    Chingu.find.mockReturnValue({
-      sort: () => ({
-        skip: () => ({
-          limit: () => [],
-        }),
-      }),
-    });
-    Chingu.countDocuments.mockResolvedValue(0);
-
-    await request(app).get("/api/chingus?soloProjectTier=2");
-
-    expect(Chingu.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        soloProjectTier: { $regex: "2", $options: "i" },
-      })
-    );
-  });
-
-  test("should apply fuzzy search for voyageTier", async () => {
-    Chingu.find.mockReturnValue({
-      sort: () => ({
-        skip: () => ({
-          limit: () => [],
-        }),
-      }),
-    });
-    Chingu.countDocuments.mockResolvedValue(0);
-
-    await request(app).get("/api/chingus?voyageTier=5");
-
-    expect(Chingu.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        voyageTier: { $regex: "5", $options: "i" },
-      })
-    );
-  });
-
-  test("should apply fuzzy search for voyage", async () => {
-    Chingu.find.mockReturnValue({
-      sort: () => ({
-        skip: () => ({
-          limit: () => [],
-        }),
-      }),
-    });
-    Chingu.countDocuments.mockResolvedValue(0);
-
-    await request(app).get("/api/chingus?voyage=v42");
-
-    expect(Chingu.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        voyage: { $regex: "v42", $options: "i" },
-      })
-    );
-  });
-
-  // -------------------------
-  // NUMERIC FILTERS
-  // -------------------------
-
+  // ---------------------------
+  // NUMERIC FILTER
+  // ---------------------------
   test("should apply numeric filter for yearJoined", async () => {
     Chingu.find.mockReturnValue({
       sort: () => ({
@@ -203,10 +102,9 @@ describe("GET /api/chingus", () => {
     );
   });
 
-  // -------------------------
+  // ---------------------------
   // SORTING
-  // -------------------------
-
+  // ---------------------------
   test("should handle sorting", async () => {
     const sortMock = jest.fn().mockReturnValue({
       skip: () => ({
@@ -222,11 +120,14 @@ describe("GET /api/chingus", () => {
     expect(sortMock).toHaveBeenCalledWith("countryName");
   });
 
-  // -------------------------
-  // SERVER ERROR HANDLING
-  // -------------------------
-
+  // ---------------------------
+  // SERVER ERROR
+  // ---------------------------
   test("should return 500 on server error", async () => {
+    // Silence error logs for THIS test only
+    const original = console.error;
+    console.error = jest.fn();
+
     Chingu.find.mockImplementation(() => {
       throw new Error("DB error");
     });
@@ -235,5 +136,7 @@ describe("GET /api/chingus", () => {
 
     expect(res.status).toBe(500);
     expect(res.body.message).toBe("Server error");
+
+    console.error = original; // restore
   });
 });

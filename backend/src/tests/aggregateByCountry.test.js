@@ -14,6 +14,10 @@ const { aggregateByCountry } = require("../controllers/memberController");
 const app = express();
 app.get("/api/chingus/aggregate-by-country", aggregateByCountry);
 
+// Helper for escaped regex
+const escapeRegex = (str) =>
+  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 describe("GET /api/chingus/aggregate-by-country", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -51,11 +55,11 @@ describe("GET /api/chingus/aggregate-by-country", () => {
     ]);
   });
 
-  test("should apply filters correctly and include them in $match", async () => {
+  test("should apply sanitized fuzzy filters + exact voyage + numeric yearJoined", async () => {
     Chingu.aggregate.mockResolvedValue([]);
 
     const res = await request(app).get(
-      "/api/chingus/aggregate-by-country?country=ind&gender=female&yearJoined=2021"
+      "/api/chingus/aggregate-by-country?country=ind.&gender=female?&voyage=V58&yearJoined=2021"
     );
 
     expect(res.status).toBe(200);
@@ -63,8 +67,9 @@ describe("GET /api/chingus/aggregate-by-country", () => {
     expect(Chingu.aggregate).toHaveBeenCalledWith([
       {
         $match: {
-          countryName: { $regex: "ind", $options: "i" },
-          gender: { $regex: "female", $options: "i" },
+          countryName: { $regex: escapeRegex("ind."), $options: "i" },
+          gender: { $regex: escapeRegex("female?"), $options: "i" },
+          voyage: "V58",              // exact match now
           yearJoined: 2021,
         },
       },
