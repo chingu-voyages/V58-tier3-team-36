@@ -4,7 +4,7 @@ const router = express.Router();
 const {
   getChingus,
   aggregateByCountry,
-} = require("../controllers/memberController"); 
+} = require('../controllers/memberController'); 
 
 router.get('/aggregate-by-country', aggregateByCountry);
 router.get("/", getChingus);
