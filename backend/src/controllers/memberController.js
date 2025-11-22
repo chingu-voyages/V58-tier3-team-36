@@ -2,7 +2,33 @@ const Chingu = require('../models/Chingu');
 
 const aggregateByCountry = async (req, res) => {
   try {
+    const {
+      country,
+      gender,
+      roleType,
+      role,
+      soloProjectTier,
+      voyageTier,
+      voyage,
+      yearJoined,
+    } = req.query;
+
+    const matchQuery = {};
+
+    // Fuzzy search
+    if (country) matchQuery.countryName = { $regex: country, $options: "i" };
+    if (gender) matchQuery.gender = { $regex: gender, $options: "i" };
+    if (roleType) matchQuery.roleType = { $regex: roleType, $options: "i" };
+    if (role) matchQuery.role = { $regex: role, $options: "i" };
+    if (soloProjectTier) matchQuery.soloProjectTier = { $regex: soloProjectTier, $options: "i" };
+    if (voyageTier) matchQuery.voyageTier = { $regex: voyageTier, $options: "i" };
+    if (voyage) matchQuery.voyage = { $regex: voyage, $options: "i" };
+
+    // Exact numeric match
+    if (yearJoined) matchQuery.yearJoined = Number(yearJoined);
+
     const result = await Chingu.aggregate([
+      { $match: matchQuery },
       {
         $group: {
           _id: "$countryName",
@@ -26,12 +52,16 @@ const aggregateByCountry = async (req, res) => {
   }
 };
 
+
 const getChingus = async (req, res) => {
   try {
     const {
       country,
       gender,
       roleType,
+      role,
+      soloProjectTier,
+      voyageTier,
       voyage,
       yearJoined,
       page = 1,
@@ -41,16 +71,19 @@ const getChingus = async (req, res) => {
 
     const query = {};
 
-    // Fuzzy contains search (LIKE %value%), case-insensitive
+    // Fuzzy searches
     if (country) query.countryName = { $regex: country, $options: "i" };
     if (gender) query.gender = { $regex: gender, $options: "i" };
     if (roleType) query.roleType = { $regex: roleType, $options: "i" };
+    if (role) query.role = { $regex: role, $options: "i" };
+    if (soloProjectTier) query.soloProjectTier = { $regex: soloProjectTier, $options: "i" };
+    if (voyageTier) query.voyageTier = { $regex: voyageTier, $options: "i" };
     if (voyage) query.voyage = { $regex: voyage, $options: "i" };
 
     // Exact numeric match
     if (yearJoined) query.yearJoined = Number(yearJoined);
 
-    // Pagination
+    // Pagination parameters
     const skip = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
@@ -70,7 +103,6 @@ const getChingus = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-
 
 
 module.exports = {

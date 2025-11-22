@@ -10,7 +10,7 @@ jest.mock("../models/Chingu", () => ({
 const Chingu = require("../models/Chingu");
 const { aggregateByCountry } = require("../controllers/memberController");
 
-// Create a fake express app
+// Fake express app
 const app = express();
 app.get("/api/chingus/aggregate-by-country", aggregateByCountry);
 
@@ -27,15 +27,13 @@ describe("GET /api/chingus/aggregate-by-country", () => {
 
     Chingu.aggregate.mockResolvedValue(mockData);
 
-    const res = await request(app).get(
-      "/api/chingus/aggregate-by-country"
-    );
+    const res = await request(app).get("/api/chingus/aggregate-by-country");
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(mockData);
 
-    // Verify correct Mongo pipeline
     expect(Chingu.aggregate).toHaveBeenCalledWith([
+      { $match: {} },
       {
         $group: {
           _id: "$countryName",
@@ -53,12 +51,44 @@ describe("GET /api/chingus/aggregate-by-country", () => {
     ]);
   });
 
-  test("should return an empty array if aggregation returns none", async () => {
+  test("should apply filters correctly and include them in $match", async () => {
     Chingu.aggregate.mockResolvedValue([]);
 
     const res = await request(app).get(
-      "/api/chingus/aggregate-by-country"
+      "/api/chingus/aggregate-by-country?country=ind&gender=female&yearJoined=2021"
     );
+
+    expect(res.status).toBe(200);
+
+    expect(Chingu.aggregate).toHaveBeenCalledWith([
+      {
+        $match: {
+          countryName: { $regex: "ind", $options: "i" },
+          gender: { $regex: "female", $options: "i" },
+          yearJoined: 2021,
+        },
+      },
+      {
+        $group: {
+          _id: "$countryName",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          countryName: "$_id",
+          count: 1,
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+  });
+
+  test("should return empty array when no results found", async () => {
+    Chingu.aggregate.mockResolvedValue([]);
+
+    const res = await request(app).get("/api/chingus/aggregate-by-country");
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
@@ -67,9 +97,7 @@ describe("GET /api/chingus/aggregate-by-country", () => {
   test("should return 500 on server error", async () => {
     Chingu.aggregate.mockRejectedValue(new Error("Aggregation failed"));
 
-    const res = await request(app).get(
-      "/api/chingus/aggregate-by-country"
-    );
+    const res = await request(app).get("/api/chingus/aggregate-by-country");
 
     expect(res.status).toBe(500);
     expect(res.body).toEqual({
