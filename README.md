@@ -41,3 +41,17 @@ coding!
   ...
 
 - Teammate name #n: [GitHub](https://github.com/ghaccountname) / [LinkedIn](https://linkedin.com/in/liaccountname)
+
+
+### Running the Database Seed Script
+Follow these instructions to populate your local development database with initial data, such as demographics, using the seed script.
+- Node version >= 18 is required to run the seeding script
+- NB: Invalid timestamp returns a default of 2010-01-01
+- Empty fields default to N/A
+
+#### Seed Script Command
+Use the following command to execute the seed script, which specifically populates demographics data:
+
+```
+npm run seed:demographics
+```
