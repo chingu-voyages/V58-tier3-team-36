@@ -55,7 +55,7 @@ describe("GET /api/chingus/aggregate-by-country", () => {
     ]);
   });
 
-  test("should apply sanitized fuzzy filters + exact voyage + numeric yearJoined", async () => {
+  test("should apply sanitized exact filters + exact voyage + numeric yearJoined", async () => {
     Chingu.aggregate.mockResolvedValue([]);
 
     const res = await request(app).get(
@@ -67,9 +67,19 @@ describe("GET /api/chingus/aggregate-by-country", () => {
     expect(Chingu.aggregate).toHaveBeenCalledWith([
       {
         $match: {
-          countryName: { $regex: escapeRegex("ind."), $options: "i" },
-          gender: { $regex: escapeRegex("female?"), $options: "i" },
-          voyage: "V58",              // exact match now
+          countryName: {
+            $in: [
+              {
+                $regex: "^" + escapeRegex("ind.") + "$",
+                $options: "i",
+              },
+            ],
+          },
+          gender: {
+            $regex: "^" + escapeRegex("female?") + "$",
+            $options: "i",
+          },
+          voyage: "V58",
           yearJoined: 2021,
         },
       },
@@ -88,6 +98,31 @@ describe("GET /api/chingus/aggregate-by-country", () => {
       },
       { $sort: { count: -1 } },
     ]);
+  });
+
+  test("should support multiple countries using $in", async () => {
+    Chingu.aggregate.mockResolvedValue([]);
+
+    const res = await request(app).get(
+      "/api/chingus/aggregate-by-country?country=Tanzania&country=Kenya"
+    );
+
+    expect(res.status).toBe(200);
+
+    expect(Chingu.aggregate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          $match: {
+            countryName: {
+              $in: [
+                { $regex: "^Tanzania$", $options: "i" },
+                { $regex: "^Kenya$", $options: "i" },
+              ],
+            },
+          },
+        }),
+      ])
+    );
   });
 
   test("should return empty array when no results found", async () => {

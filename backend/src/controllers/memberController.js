@@ -1,8 +1,7 @@
-const Chingu = require('../models/Chingu');
+const Chingu = require("../models/Chingu");
 
 // Escape regex special characters to prevent ReDoS & regex injection
-const escapeRegex = (str) =>
-  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const aggregateByCountry = async (req, res) => {
   try {
@@ -13,21 +12,29 @@ const aggregateByCountry = async (req, res) => {
       role,
       soloProjectTier,
       voyageTier,
-      voyage,       
+      voyage,
       yearJoined,
     } = req.query;
 
     const matchQuery = {};
 
     // SAFE fuzzy searches
-    if (country)
-      matchQuery.countryName = { $regex: escapeRegex(country), $options: "i" };
+    if (country) {
+      const countries = Array.isArray(country) ? country : [country];
+
+      matchQuery.countryName = {
+        $in: countries.map((c) => ({
+          $regex: `^${escapeRegex(c.trim())}$`,
+          $options: "i",
+        })),
+      };
+    }
+
     if (gender)
-      matchQuery.gender = { $regex: escapeRegex(gender), $options: "i" };
+      matchQuery.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
     if (roleType)
       matchQuery.roleType = { $regex: escapeRegex(roleType), $options: "i" };
-    if (role)
-      matchQuery.role = { $regex: escapeRegex(role), $options: "i" };
+    if (role) matchQuery.role = { $regex: escapeRegex(role), $options: "i" };
     if (soloProjectTier)
       matchQuery.soloProjectTier = {
         $regex: escapeRegex(soloProjectTier),
@@ -79,7 +86,7 @@ const getChingus = async (req, res) => {
       role,
       soloProjectTier,
       voyageTier,
-      voyage,       // exact match
+      voyage, // exact match
       yearJoined,
       page = 1,
       limit = 20,
@@ -95,21 +102,26 @@ const getChingus = async (req, res) => {
     // SAFE fuzzy searches
     if (country)
       query.countryName = { $regex: escapeRegex(country), $options: "i" };
-    if (gender)
-      query.gender = { $regex: escapeRegex(gender), $options: "i" };
+
+    if (gender) {
+      query.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
+    }
+
     if (roleType)
       query.roleType = { $regex: escapeRegex(roleType), $options: "i" };
-    if (role)
-      query.role = { $regex: escapeRegex(role), $options: "i" };
+
+    if (role) query.role = { $regex: escapeRegex(role), $options: "i" };
+
     if (soloProjectTier)
       query.soloProjectTier = {
         $regex: escapeRegex(soloProjectTier),
         $options: "i",
       };
+
     if (voyageTier)
       query.voyageTier = { $regex: escapeRegex(voyageTier), $options: "i" };
 
-    // ❗ Exact match recommended for voyage IDs
+    // Exact match for voyage IDs
     if (voyage) query.voyage = voyage;
 
     // Exact numeric match

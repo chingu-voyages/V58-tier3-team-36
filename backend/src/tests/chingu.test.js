@@ -50,7 +50,6 @@ describe("GET /api/chingus", () => {
   // ---------------------------
   const fuzzyFields = [
   { key: "country", mongo: "countryName" },
-  { key: "gender", mongo: "gender" },
   { key: "roleType", mongo: "roleType" },
   { key: "role", mongo: "role" },
   { key: "soloProjectTier", mongo: "soloProjectTier" },
