@@ -21,7 +21,7 @@ export default function Footer() {
           href="https://github.com/chingu-voyages/V58-tier3-team-36" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="flex items-center space-x-1 text-brand-mint hover:text-white transition-colors font-medium group"
+          className="flex items-center space-x-1 text-[rgb(var(--color-chingublue))] hover:text-[rgb(var(--color-chingutextgrey))] transition-colors font-medium group"
         >
           <Github className="w-4 h-4 mr-1 group-hover:scale-110 transition-transform" />
           <span>View Team Git</span>
