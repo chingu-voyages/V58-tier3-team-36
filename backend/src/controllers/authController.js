@@ -4,6 +4,14 @@ exports.googleAuth = async (req, res) => {
   try {
     const { email, name, image, googleId } = req.body;
 
+    // Validate required fields
+    if (!email || !name || !googleId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: email, name, and googleId are required',
+      });
+    }
+
     // Check if user exists
     let user = await User.findOne({ email });
 
@@ -16,6 +24,7 @@ exports.googleAuth = async (req, res) => {
         googleId,
       });
       await user.save();
+      console.log('✅ New user created:', email);
     } else {
       // Update existing user
       user.name = name;
@@ -24,6 +33,7 @@ exports.googleAuth = async (req, res) => {
         user.googleId = googleId;
       }
       await user.save();
+      console.log('✅ User updated:', email);
     }
 
     res.status(200).json({
@@ -36,10 +46,11 @@ exports.googleAuth = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Google auth error:', error);
+    console.error('❌ Google auth error:', error);
     res.status(500).json({
       success: false,
       message: 'Authentication failed',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 };
