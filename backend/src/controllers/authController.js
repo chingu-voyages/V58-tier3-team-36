@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 exports.googleAuth = async (req, res) => {
   try {
@@ -50,6 +51,91 @@ exports.googleAuth = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Authentication failed',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+};
+
+exports.register = async (req, res) => {
+  // Registration logic here
+  try {
+    const { email, name, password } = req.body;
+    if (!email || !name || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: email, name, and password are required',
+      });
+    }
+    let user = await User.findOne({
+      email,
+    });
+    if (user) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists',
+      });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user = new User({
+      email,
+      name,
+      password:hashedPassword,
+    });
+    await user.save();
+    res.status(201).json({
+      success: true,
+      user: {
+        email: user.email,
+        name: user.name,
+      },
+    });
+  }
+  catch (error) {
+    console.error('❌ Registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Registration failed',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+};
+
+exports.login = async (req, res) => {
+  // Login logic here
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: email and password are required',
+      });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password',
+      });
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password',
+      });
+    }
+    res.status(200).json({
+      success: true,
+      user: {
+        email: user.email,
+        name: user.name,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Login failed',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
