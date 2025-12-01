@@ -12,6 +12,12 @@ jest.mock('lucide-react', () => ({
   Menu: () => <span data-testid="icon-menu">MenuIcon</span>,
   X: () => <span data-testid="icon-x">XIcon</span>,
 }));
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({
+    data: null,
+    status: 'unauthenticated'
+  })
+}));
 
 // Define accessible names for the toggle buttons
 const OPEN_MENU_NAME = /open navigation menu/i; 

@@ -51,7 +51,7 @@ describe('Header Authentication', () => {
 
     render(<Header />);
 
-    expect(screen.getByText('Welcome, John Doe')).toBeInTheDocument();
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByAltText('John Doe')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign out/i })).toBeInTheDocument();
   });
@@ -90,7 +90,7 @@ describe('Header Authentication', () => {
 
     render(<Header />);
 
-    expect(screen.getByText('Welcome, Jane Doe')).toBeInTheDocument();
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
     expect(screen.queryByAltText('Jane Doe')).not.toBeInTheDocument();
   });
 

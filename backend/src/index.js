@@ -14,7 +14,7 @@ app.use(express.json());
 
 // Routes
 const chinguRoutes = require("./routes/chingumember");
-const authRoutes = require("./routes/auth");
+const authRoutes = require("./routes/authRoutes");
 app.use("/api/chingus", chinguRoutes);
 app.use("/api/auth", authRoutes);
 
