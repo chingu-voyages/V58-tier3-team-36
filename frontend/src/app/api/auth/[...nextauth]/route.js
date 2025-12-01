@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 // Validate required environment variables
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
@@ -12,11 +13,47 @@ export const authOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        try {
+          const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+          const response = await fetch(`${backendUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            return {
+              id: data.user._id || data.user.id,
+              email: data.user.email,
+              name: data.user.name,
+              image: data.user.image,
+            };
+          }
+          
+          return null;
+        } catch (error) {
+          console.error('Credentials auth error:', error);
+          return null;
+        }
+      }
+    }),
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Send user data to your backend (optional - continues even if backend is down)
-      if (process.env.NEXT_PUBLIC_API_URL) {
+      // Handle Google sign-in
+      if (account?.provider === 'google' && process.env.NEXT_PUBLIC_API_URL) {
         try {
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`, {
             method: 'POST',

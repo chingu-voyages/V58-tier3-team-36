@@ -28,6 +28,7 @@ export default function Header() {
               width={32} 
               height={32} 
               className="rounded-full"
+              style={{ height: 'auto' }}
             />
             <h1 className="text-xl font-extrabold text-[rgb(var(--color-chingublue))] hidden sm:block">Demographics Explorer</h1>
           </Link>
