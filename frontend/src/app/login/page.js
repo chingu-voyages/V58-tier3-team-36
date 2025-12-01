@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 
 export default function LoginPage() {
-  const { data: session, status } = useSession();
+  const {status } = useSession();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

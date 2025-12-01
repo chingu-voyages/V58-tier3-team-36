@@ -1,6 +1,11 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
+// Validate required environment variables
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  throw new Error('Missing required environment variables: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set');
+}
+
 export const authOptions = {
   providers: [
     GoogleProvider({

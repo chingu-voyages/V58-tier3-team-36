@@ -3,22 +3,13 @@ const mongoose = require('mongoose');
 
 let mongoServer;
 
-/**
- * Connect to the in-memory database
- */
 const connect = async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
 
-  await mongoose.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  await mongoose.connect(uri);
 };
 
-/**
- * Drop database, close the connection and stop mongod
- */
 const closeDatabase = async () => {
   if (mongoose.connection.readyState !== 0) {
     await mongoose.connection.dropDatabase();

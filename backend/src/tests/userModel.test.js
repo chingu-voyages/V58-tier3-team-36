@@ -4,10 +4,7 @@ const User = require('../models/User');
 describe('User Model', () => {
   beforeAll(async () => {
     // Use in-memory database for testing
-    await mongoose.connect('mongodb://localhost:27017/test_db', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect('mongodb://localhost:27017/test_db');
   });
 
   afterAll(async () => {

@@ -13,10 +13,7 @@ describe('Authentication Integration Tests', () => {
   beforeAll(async () => {
     // Connect to test database
     const mongoUri = process.env.MONGO_TEST_URI || 'mongodb://localhost:27017/test_auth_db';
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(mongoUri);
   });
 
   afterAll(async () => {
