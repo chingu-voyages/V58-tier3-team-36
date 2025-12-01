@@ -57,9 +57,14 @@ export default function Header() {
               </Button>
             </>
           ) : (
+            <>
             <Link href="/login">
               <Button variant="outline" size="sm">Sign In</Button>
             </Link>
+            <Link href="/register">
+              <Button variant="inline" className="hover:cursor-pointer text-[rgb(var(--color-chingu-text-grey))]" size="sm">Register</Button>
+            </Link>
+            </>
           )}
         </div>
             </div>

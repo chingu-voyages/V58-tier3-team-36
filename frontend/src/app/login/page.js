@@ -1,13 +1,19 @@
 'use client';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -19,22 +25,89 @@ export default function LoginPage() {
     signIn('google', { callbackUrl: '/' });
   };
 
+  const handleEmailSignIn = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const result = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+    }
+    catch (error) {
+      console.error('Email sign-in error:', error);
+    } 
+    finally {
+      setIsLoading(false);
+    }
+  };
+
   if (status === 'loading') {
-    return (
+    return(
       <div className="flex items-center justify-center min-h-screen">
         <p>Loading...</p>
       </div>
     );
   }
 
+ else if(status === 'error'){
+    return(
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500">Authentication Error. Please try again.</p>
+        <Button onClick={() => router.push('/login')} className="ml-4">
+          Retry
+        </Button>
+      </div>
+    )
+  }
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-[400px]">
         <CardHeader>
           <CardTitle>Welcome to Chingu Demographics</CardTitle>
-          <CardDescription>Sign in with your Google account to continue</CardDescription>
+          <CardDescription>Sign in to your account to continue</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <form onSubmit={handleEmailSignIn} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Signing in...' : 'Sign in'}
+            </Button>
+          </form>
+          
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+          
           <Button onClick={handleGoogleSignIn} className="w-full" variant="outline">
             <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
               <path
