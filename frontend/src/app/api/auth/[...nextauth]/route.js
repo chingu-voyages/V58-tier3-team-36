@@ -10,29 +10,29 @@ export const authOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Send user data to your backend
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: user.email,
-            name: user.name,
-            image: user.image,
-            googleId: account.providerAccountId,
-          }),
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          user.id = data.user._id;
-          return true;
+      // Send user data to your backend (optional - continues even if backend is down)
+      if (process.env.NEXT_PUBLIC_API_URL) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              googleId: account.providerAccountId,
+            }),
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            user.id = data.user._id;
+          }
+        } catch (error) {
+          console.error('Backend sync failed (continuing anyway):', error.message);
         }
-        return false;
-      } catch (error) {
-        console.error('Error during sign in:', error);
-        return false;
       }
+      return true;
     },
     async jwt({ token, user, account }) {
       if (user) {

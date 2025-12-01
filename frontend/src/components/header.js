@@ -9,6 +9,7 @@ import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Header() {
+  const { data: session, status } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const closeMobileMenu = () => setIsMenuOpen(false);
 
@@ -43,7 +44,7 @@ export default function Header() {
           <div className="flex items-center gap-4">
           {status === 'authenticated' ? (
             <>
-              <span className="text-sm">Welcome, {session.user.name}</span>
+              <span className="text-sm">{session.user.name}</span>
               {session.user.image && (
                 <img
                   src={session.user.image}
