@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import Navigation from "@/components/navigation";
+import {useSession, signOut} from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
@@ -38,6 +39,28 @@ export default function Header() {
           {/* Auth & Mobile Menu Button */}
           <div className="flex items-center space-x-4">
             <div className="hidden md:block">
+                 {/* Auth Section */}
+          <div className="flex items-center gap-4">
+          {status === 'authenticated' ? (
+            <>
+              <span className="text-sm">Welcome, {session.user.name}</span>
+              {session.user.image && (
+                <img
+                  src={session.user.image}
+                  alt={session.user.name}
+                  className="w-8 h-8 rounded-full"
+                />
+              )}
+              <Button onClick={() => signOut()} variant="outline" size="sm">
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <Link href="/login">
+              <Button variant="outline" size="sm">Sign In</Button>
+            </Link>
+          )}
+        </div>
             </div>
             <Button 
               variant="ghost" 
@@ -52,6 +75,7 @@ export default function Header() {
             </Button>
           </div>
         </div>
+
 
         {/* Mobile Dropdown Menu */}
         <div id="mobile-menu" className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'} bg-white shadow-inner border-t border-[rgb(var(--color-chingumint))]/50 p-4`}>
