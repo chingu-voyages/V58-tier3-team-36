@@ -22,10 +22,11 @@ export default function SignUp() {
     const { data: session } = useSession();
 
     // Redirect if already signed in
-    if (session) {
-        router.push('/');
-        return null;
-    }
+    useEffect(() => {
+        if (session) {
+            router.push('/');
+        }
+    }, [session, router]);
 
     const handleGoogleSignup = () => {
         signIn('google', { callbackUrl: '/' });
