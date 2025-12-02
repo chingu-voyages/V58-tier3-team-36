@@ -53,16 +53,6 @@ export default function LoginPage() {
     );
   }
 
- else if(status === 'error'){
-    return(
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-500">Authentication Error. Please try again.</p>
-        <Button onClick={() => router.push('/login')} className="ml-4">
-          Retry
-        </Button>
-      </div>
-    )
-  }
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-[400px]">
