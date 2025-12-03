@@ -76,7 +76,7 @@ describe("GET /api/chingus/aggregate-by-country", () => {
             },
           ],
           gender: {
-            $regex: "^" + escapeRegex("female?") + "$",
+            $regex: `^${escapeRegex("female?")}$`,
             $options: "i",
           },
           voyage: "V58",
