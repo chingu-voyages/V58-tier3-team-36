@@ -77,8 +77,11 @@ describe("GET /api/chingus", () => {
   });
 
   // ------------------------------------------------
-  // OTHER FUZZY FIELDS — DIRECT REGEX (NO $or)
+  // OTHER FIELDS — DIRECT REGEX (NO $or)
   // ------------------------------------------------
+  // Note: Country uses multi-value partial/fuzzy matching ($or).
+  //       Other fields below use direct regex matching (may be partial or exact).
+  //       Gender now uses exact match (with ^ and $ anchors in the controller).
 
   const directFuzzyFields = [
     { key: "roleType", mongo: "roleType" },
