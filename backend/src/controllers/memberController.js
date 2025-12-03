@@ -105,7 +105,7 @@ const getChingus = async (req, res) => {
 
       query.$or = countries.map((c) => ({
         countryName: {
-          $regex: escapeRegex(String(c).trim()), 
+          $regex: escapeRegex(String(c).trim()),
           $options: "i",
         },
       }));
