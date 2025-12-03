@@ -24,7 +24,7 @@ const aggregateByCountry = async (req, res) => {
 
       matchQuery.$or = countries.map((c) => ({
         countryName: {
-          $regex: escapeRegex(c.trim()), // fuzzy contains search
+          $regex: escapeRegex(String(c).trim()), // fuzzy contains search
           $options: "i",
         },
       }));
