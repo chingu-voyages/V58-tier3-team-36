@@ -18,7 +18,7 @@ const aggregateByCountry = async (req, res) => {
 
     const matchQuery = {};
 
-    // SAFE fuzzy searches
+    // SAFE regex searches (fuzzy for most fields, exact for gender)
     if (country) {
       const countries = Array.isArray(country) ? country : [country];
 
