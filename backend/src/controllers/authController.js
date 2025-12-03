@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 exports.googleAuth = async (req, res) => {
   try {
@@ -73,6 +74,24 @@ exports.register = async (req, res) => {
         message: 'Missing required fields: email, name, and password are required',
       });
     }
+
+    // Password strength validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long',
+      });
+    }
+
+    // Password complexity validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+      });
+    }
+
     let user = await User.findOne({
       email,
     });
@@ -86,7 +105,7 @@ exports.register = async (req, res) => {
     user = new User({
       email,
       name,
-      password:hashedPassword,
+      password: hashedPassword,
     });
     await user.save();
     res.status(201).json({
@@ -98,7 +117,7 @@ exports.register = async (req, res) => {
     });
   }
   catch (error) {
-    console.error('❌ Registration error:', error);
+    console.error('Registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Registration failed',
@@ -124,6 +143,15 @@ exports.login = async (req, res) => {
         message: 'Invalid email or password',
       });
     }
+    
+    // Check if user has a password set (i.e., not an OAuth-only account)
+    if (!user.password) {
+      return res.status(400).json({
+        success: false,
+        message: 'This account was registered via Google. Please log in with Google.',
+      });
+    }
+    
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(400).json({
@@ -131,15 +159,28 @@ exports.login = async (req, res) => {
         message: 'Invalid email or password',
       });
     }
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        userId: user._id, 
+        email: user.email 
+      },
+      process.env.JWT_SECRET || 'THE_SECRET_KEY',
+      { expiresIn: '24h' }
+    );
+    
     res.status(200).json({
       success: true,
+      token,
       user: {
+        _id: user._id,
         email: user.email,
         name: user.name,
       },
     });
   } catch (error) {
-    console.error('❌ Login error:', error);
+    console.error('Login error:', error);
     res.status(500).json({
       success: false,
       message: 'Login failed',

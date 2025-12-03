@@ -2,6 +2,7 @@
 
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,10 +40,42 @@ export default function SignUp() {
         });
     };
 
+    const validatePassword = (password) => {
+        const minLength = 8;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumbers = /\d/.test(password);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+        if (password.length < minLength) {
+            return 'Password must be at least 8 characters long';
+        }
+        if (!hasUpperCase) {
+            return 'Password must contain at least one uppercase letter';
+        }
+        if (!hasLowerCase) {
+            return 'Password must contain at least one lowercase letter';
+        }
+        if (!hasNumbers) {
+            return 'Password must contain at least one number';
+        }
+        if (!hasSpecialChar) {
+            return 'Password must contain at least one special character';
+        }
+        return null;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
+
+        const passwordError = validatePassword(formData.password);
+        if (passwordError) {
+            setError(passwordError);
+            setLoading(false);
+            return;
+        }
 
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
@@ -91,7 +124,7 @@ export default function SignUp() {
         <div className="flex items-center justify-center min-h-screen">
              <Card className="w-[400px]">
                <CardHeader>
- <CardTitle>Create your account</CardTitle>
+                <CardTitle>Create your account</CardTitle>
                  <CardDescription>Sign up to get started</CardDescription>
                  </CardHeader>
                        <CardContent className="space-y-4">
@@ -174,13 +207,7 @@ export default function SignUp() {
                     <div className="text-center">
                         <span className="text-sm text-gray-600">
                             Already have an account?{' '}
-                            <Button
-                                type="button"
-                                onClick={() => router.push('/login')}
-                                className="font-medium text-hover:text-indigo-500"
-                            >
-                                Sign in
-                            </Button>
+                           <Link href="/login" className="font-medium hover:text-indigo-500">Sign in</Link>
                         </span>
                     </div>
                 </form>

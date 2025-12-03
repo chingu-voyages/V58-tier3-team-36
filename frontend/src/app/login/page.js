@@ -1,5 +1,6 @@
 'use client';
 import { signIn, useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -29,13 +30,17 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const result = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       });
+      
+      if (result?.error) {
+        console.error('Email sign-in error:', result.error);
+      } else if (result?.ok) {
+        router.push('/');
+      }
     }
     catch (error) {
       console.error('Email sign-in error:', error);
@@ -87,6 +92,12 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
+              <div className="text-center">
+                        <span className="text-sm text-gray-600">
+                            Don't have an account?{' '}
+                           <Link href="/register" className="font-medium hover:text-indigo-500">Sign up</Link>
+                        </span>
+                    </div>
           </form>
           
           <div className="relative">
