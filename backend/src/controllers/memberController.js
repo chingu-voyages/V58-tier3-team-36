@@ -22,12 +22,12 @@ const aggregateByCountry = async (req, res) => {
     if (country) {
       const countries = Array.isArray(country) ? country : [country];
 
-      matchQuery.countryName = {
-        $in: countries.map((c) => ({
-          $regex: `^${escapeRegex(c.trim())}$`,
+      matchQuery.$or = countries.map((c) => ({
+        countryName: {
+          $regex: escapeRegex(c.trim()), // fuzzy contains search
           $options: "i",
-        })),
-      };
+        },
+      }));
     }
 
     if (gender)
@@ -100,8 +100,16 @@ const getChingus = async (req, res) => {
     const query = {};
 
     // SAFE fuzzy searches
-    if (country)
-      query.countryName = { $regex: escapeRegex(country), $options: "i" };
+    if (country) {
+  const countries = Array.isArray(country) ? country : [country];
+
+  query.$or = countries.map((c) => ({
+    countryName: {
+      $regex: escapeRegex(String(c).trim()), 
+      $options: "i",
+    },
+  }));
+}
 
     if (gender) {
       query.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
