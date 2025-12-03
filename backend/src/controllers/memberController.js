@@ -99,7 +99,7 @@ const getChingus = async (req, res) => {
 
     const query = {};
 
-    // SAFE fuzzy searches
+    // SAFE regex searches (fuzzy for most fields, exact for gender)
     if (country) {
       const countries = Array.isArray(country) ? country : [country];
 
