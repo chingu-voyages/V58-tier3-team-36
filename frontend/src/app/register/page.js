@@ -91,8 +91,7 @@ export default function SignUp() {
         <div className="flex items-center justify-center min-h-screen">
              <Card className="w-[400px]">
                <CardHeader>
- <CardTitle>                        Create your account
-</CardTitle>
+ <CardTitle>Create your account</CardTitle>
                  <CardDescription>Sign up to get started</CardDescription>
                  </CardHeader>
                        <CardContent className="space-y-4">
