@@ -3,11 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import Navigation from "@/components/navigation";
+import {useSession, signOut} from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Header() {
+  const { data: session, status } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const closeMobileMenu = () => setIsMenuOpen(false);
 
@@ -26,6 +28,7 @@ export default function Header() {
               width={32} 
               height={32} 
               className="rounded-full"
+              style={{ height: 'auto' }}
             />
             <h1 className="text-xl font-extrabold text-[rgb(var(--color-chingublue))] hidden sm:block">Demographics Explorer</h1>
           </Link>
@@ -38,6 +41,35 @@ export default function Header() {
           {/* Auth & Mobile Menu Button */}
           <div className="flex items-center space-x-4">
             <div className="hidden md:block">
+                 {/* Auth Section */}
+          <div className="flex items-center gap-4">
+          {status === 'authenticated' ? (
+            <>
+              <span className="text-sm">{session.user.name}</span>
+              {session.user.image && (
+                <img
+                  src={session.user.image}
+                  alt={session.user.name}
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 rounded-full"
+                />
+              )}
+              <Button onClick={() => signOut()} variant="outline" size="sm">
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+            <Link href="/login">
+              <Button variant="outline" size="sm">Sign In</Button>
+            </Link>
+            <Link href="/register">
+              <Button variant="inline" className="hover:cursor-pointer text-[rgb(var(--color-chingu-text-grey))]" size="sm">Register</Button>
+            </Link>
+            </>
+          )}
+        </div>
             </div>
             <Button 
               variant="ghost" 
@@ -52,6 +84,7 @@ export default function Header() {
             </Button>
           </div>
         </div>
+
 
         {/* Mobile Dropdown Menu */}
         <div id="mobile-menu" className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'} bg-white shadow-inner border-t border-[rgb(var(--color-chingumint))]/50 p-4`}>
