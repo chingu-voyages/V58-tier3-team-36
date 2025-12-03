@@ -1,11 +1,11 @@
 const request = require("supertest");
 const express = require("express");
 
-// regex
+// Reproduce the same escapeRegex used in the controller
 const escapeRegex = (str) =>
   str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-// Mock Chingu 
+// Mock Chingu model
 jest.mock("../models/Chingu", () => ({
   find: jest.fn(),
   countDocuments: jest.fn(),
@@ -22,18 +22,21 @@ describe("GET /api/chingus", () => {
     jest.clearAllMocks();
   });
 
+  // Small helper to mock the chainable query
+  const mockFindChain = (data = []) => {
+    const limitMock = jest.fn().mockResolvedValue(data);
+    const skipMock = jest.fn().mockReturnValue({ limit: limitMock });
+    const sortMock = jest.fn().mockReturnValue({ skip: skipMock });
+
+    Chingu.find.mockReturnValue({ sort: sortMock });
+    return { sortMock, skipMock, limitMock };
+  };
+
   // ------------------------------------------------
   // PAGINATION TEST
   // ------------------------------------------------
   test("should return paginated results", async () => {
-    Chingu.find.mockReturnValue({
-      sort: () => ({
-        skip: () => ({
-          limit: () => [{ name: "Test User" }],
-        }),
-      }),
-    });
-
+    mockFindChain([{ name: "Test User" }]);
     Chingu.countDocuments.mockResolvedValue(10);
 
     const res = await request(app).get("/api/chingus?page=1&limit=1");
@@ -42,32 +45,38 @@ describe("GET /api/chingus", () => {
     expect(res.body.data.length).toBe(1);
     expect(res.body.total).toBe(10);
     expect(res.body.page).toBe(1);
+    expect(res.body.limit).toBe(1);
     expect(res.body.totalPages).toBe(10);
+
+    // Also ensure query object was empty (no filters)
+    expect(Chingu.find).toHaveBeenCalledWith({});
   });
 
   // ------------------------------------------------
   // COUNTRY — MULTI FUZZY ($or)
   // ------------------------------------------------
-  test("should apply fuzzy OR search for country", async () => {
-    Chingu.find.mockReturnValue({
-      sort: () => ({
-        skip: () => ({
-          limit: () => [],
-        }),
-      }),
-    });
-
+  test("should apply fuzzy OR search for multiple country values", async () => {
+    mockFindChain([]);
     Chingu.countDocuments.mockResolvedValue(0);
 
-    const value = "Kenya";
-    await request(app).get(`/api/chingus?country=${value}`);
+    const res = await request(app).get(
+      "/api/chingus?country=Tanzania&country=Kenya"
+    );
+
+    expect(res.status).toBe(200);
 
     expect(Chingu.find).toHaveBeenCalledWith(
       expect.objectContaining({
         $or: [
           {
             countryName: {
-              $regex: escapeRegex(value),
+              $regex: escapeRegex("Tanzania"),
+              $options: "i",
+            },
+          },
+          {
+            countryName: {
+              $regex: escapeRegex("Kenya"),
               $options: "i",
             },
           },
@@ -79,10 +88,6 @@ describe("GET /api/chingus", () => {
   // ------------------------------------------------
   // OTHER FIELDS — DIRECT REGEX (NO $or)
   // ------------------------------------------------
-  // Note: Country uses multi-value partial/fuzzy matching ($or).
-  //       Other fields below use direct regex matching (may be partial or exact).
-  //       Gender now uses exact match (with ^ and $ anchors in the controller).
-
   const directFuzzyFields = [
     { key: "roleType", mongo: "roleType" },
     { key: "role", mongo: "role" },
@@ -92,19 +97,13 @@ describe("GET /api/chingus", () => {
 
   directFuzzyFields.forEach(({ key, mongo }) => {
     test(`should apply fuzzy search for ${key}`, async () => {
-      Chingu.find.mockReturnValue({
-        sort: () => ({
-          skip: () => ({
-            limit: () => [],
-          }),
-        }),
-      });
-
+      mockFindChain([]);
       Chingu.countDocuments.mockResolvedValue(0);
 
       const value = "v42";
 
-      await request(app).get(`/api/chingus?${key}=${value}`);
+      const res = await request(app).get(`/api/chingus?${key}=${value}`);
+      expect(res.status).toBe(200);
 
       expect(Chingu.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -118,20 +117,55 @@ describe("GET /api/chingus", () => {
   });
 
   // ------------------------------------------------
-  // NUMERIC FILTER
+  // CASE-INSENSITIVE EXACT MATCH — GENDER
   // ------------------------------------------------
-  test("should apply numeric filter for yearJoined", async () => {
-    Chingu.find.mockReturnValue({
-      sort: () => ({
-        skip: () => ({
-          limit: () => [],
-        }),
-      }),
-    });
-
+  test("should apply case-insensitive exact match filter for gender", async () => {
+    mockFindChain([]);
     Chingu.countDocuments.mockResolvedValue(0);
 
-    await request(app).get("/api/chingus?yearJoined=2022");
+    const value = "Male";
+
+    const res = await request(app).get(`/api/chingus?gender=${value}`);
+    expect(res.status).toBe(200);
+
+    expect(Chingu.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        gender: {
+          $regex: `^${escapeRegex(value)}$`,
+          $options: "i",
+        },
+      })
+    );
+  });
+
+  // ------------------------------------------------
+  // EXACT MATCH — VOYAGE
+  // ------------------------------------------------
+  test("should apply exact match filter for voyage", async () => {
+    mockFindChain([]);
+    Chingu.countDocuments.mockResolvedValue(0);
+
+    const voyage = "v58-tier3-team-36";
+
+    const res = await request(app).get(`/api/chingus?voyage=${voyage}`);
+    expect(res.status).toBe(200);
+
+    expect(Chingu.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        voyage,
+      })
+    );
+  });
+
+  // ------------------------------------------------
+  // NUMERIC FILTER — yearJoined
+  // ------------------------------------------------
+  test("should apply numeric filter for yearJoined", async () => {
+    mockFindChain([]);
+    Chingu.countDocuments.mockResolvedValue(0);
+
+    const res = await request(app).get("/api/chingus?yearJoined=2022");
+    expect(res.status).toBe(200);
 
     expect(Chingu.find).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -143,19 +177,33 @@ describe("GET /api/chingus", () => {
   // ------------------------------------------------
   // SORTING
   // ------------------------------------------------
-  test("should handle sorting", async () => {
-    const sortMock = jest.fn().mockReturnValue({
-      skip: () => ({
-        limit: () => [],
-      }),
-    });
+  test("should handle sorting param", async () => {
+    const limitMock = jest.fn().mockResolvedValue([]);
+    const skipMock = jest.fn().mockReturnValue({ limit: limitMock });
+    const sortMock = jest.fn().mockReturnValue({ skip: skipMock });
 
     Chingu.find.mockReturnValue({ sort: sortMock });
     Chingu.countDocuments.mockResolvedValue(0);
 
-    await request(app).get("/api/chingus?sort=countryName");
+    const res = await request(app).get("/api/chingus?sort=countryName");
+    expect(res.status).toBe(200);
 
     expect(sortMock).toHaveBeenCalledWith("countryName");
+  });
+
+  // ------------------------------------------------
+  // PAGINATION VALIDATION (min/max)
+  // ------------------------------------------------
+  test("should clamp page and limit to valid ranges", async () => {
+    mockFindChain([]);
+    Chingu.countDocuments.mockResolvedValue(0);
+
+    const res = await request(app).get("/api/chingus?page=-5&limit=5000");
+
+    expect(res.status).toBe(200);
+    // page should be clamped to 1, limit clamped to 100
+    expect(res.body.page).toBe(1);
+    expect(res.body.limit).toBe(100);
   });
 
   // ------------------------------------------------
@@ -168,6 +216,8 @@ describe("GET /api/chingus", () => {
     Chingu.find.mockImplementation(() => {
       throw new Error("DB error");
     });
+    // countDocuments won't be reached, but mock it anyway
+    Chingu.countDocuments.mockResolvedValue(0);
 
     const res = await request(app).get("/api/chingus");
 
