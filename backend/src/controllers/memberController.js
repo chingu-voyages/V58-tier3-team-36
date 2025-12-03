@@ -101,15 +101,15 @@ const getChingus = async (req, res) => {
 
     // SAFE fuzzy searches
     if (country) {
-  const countries = Array.isArray(country) ? country : [country];
+      const countries = Array.isArray(country) ? country : [country];
 
-  query.$or = countries.map((c) => ({
-    countryName: {
-      $regex: escapeRegex(String(c).trim()), 
-      $options: "i",
-    },
-  }));
-}
+      query.$or = countries.map((c) => ({
+        countryName: {
+          $regex: escapeRegex(String(c).trim()), 
+          $options: "i",
+        },
+      }));
+    }
 
     if (gender) {
       query.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
