@@ -55,7 +55,7 @@ describe("GET /api/chingus/aggregate-by-country", () => {
     ]);
   });
 
-  test("should apply sanitized exact filters + exact voyage + numeric yearJoined", async () => {
+  test("should apply sanitized fuzzy filters + exact voyage + numeric yearJoined", async () => {
     Chingu.aggregate.mockResolvedValue([]);
 
     const res = await request(app).get(
@@ -67,14 +67,14 @@ describe("GET /api/chingus/aggregate-by-country", () => {
     expect(Chingu.aggregate).toHaveBeenCalledWith([
       {
         $match: {
-          countryName: {
-            $in: [
-              {
-                $regex: "^" + escapeRegex("ind.") + "$",
+          $or: [
+            {
+              countryName: {
+                $regex: escapeRegex("ind."),
                 $options: "i",
               },
-            ],
-          },
+            },
+          ],
           gender: {
             $regex: "^" + escapeRegex("female?") + "$",
             $options: "i",
@@ -100,7 +100,7 @@ describe("GET /api/chingus/aggregate-by-country", () => {
     ]);
   });
 
-  test("should support multiple countries using $in", async () => {
+  test("should support multiple countries using $or", async () => {
     Chingu.aggregate.mockResolvedValue([]);
 
     const res = await request(app).get(
@@ -113,12 +113,20 @@ describe("GET /api/chingus/aggregate-by-country", () => {
       expect.arrayContaining([
         expect.objectContaining({
           $match: {
-            countryName: {
-              $in: [
-                { $regex: "^Tanzania$", $options: "i" },
-                { $regex: "^Kenya$", $options: "i" },
-              ],
-            },
+            $or: [
+              {
+                countryName: {
+                  $regex: escapeRegex("Tanzania"),
+                  $options: "i",
+                },
+              },
+              {
+                countryName: {
+                  $regex: escapeRegex("Kenya"),
+                  $options: "i",
+                },
+              },
+            ],
           },
         }),
       ])
