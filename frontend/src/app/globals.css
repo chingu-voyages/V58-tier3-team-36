@@ -41,6 +41,13 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* chingu default colors */ 
+  --color-chingu-beige: var(--color-chingu-beige);
+  --color-chingu-mint: var(--color-chingu-mint);
+  --color-chingu-blue: var(--color-chingu-blue);
+  --color-chingu-text-black: var(--color-chingu-text-black);
+  --color-chingu-text-grey: var(--color-chingu-text-grey);
 }
 
 :root {
@@ -76,7 +83,14 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-}
+
+  /* Chingu default colors */
+  --color-chingu-beige: #FFF7ED;
+  --color-chingu-mint: #D1FAE5;
+  --color-chingu-blue: #079669;
+  --color-chingu-text-black: #171717;
+  --color-chingu-text-grey: #737373;
+  }
 
 .dark {
   --background: oklch(0.145 0 0);
