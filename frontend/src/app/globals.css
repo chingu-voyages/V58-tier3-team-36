@@ -1,9 +1,13 @@
 @import "tailwindcss";
-@import "tw-animate-css";
+
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";
+@plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Existing shadcn/ui inline variables */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -41,19 +45,18 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
-  /* chingu default colors */ 
-  --color-chingu-beige: var(--color-chingu-beige);
-  --color-chingu-mint: var(--color-chingu-mint);
-  --color-chingu-blue: var(--color-chingu-blue);
-  --color-chingu-text-black: var(--color-chingu-text-black);
-  --color-chingu-text-grey: var(--color-chingu-text-grey);
+  
+  /* Chingu Brand Colors */
+  --color-brand-beige: 255 247 237;
+  --color-brand-mint: 209 250 229;
+  --color-brand-blue: 7 150 105;
+  --color-brand-text-black: 23 23 23;
+  --color-brand-text-grey: 115 115 115;
 }
 
 :root {
+  /* Existing shadcn/ui root variables (oklch) */
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -83,16 +86,19 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 
-  /* Chingu default colors */
-  --color-chingu-beige: #FFF7ED;
-  --color-chingu-mint: #D1FAE5;
-  --color-chingu-blue: #079669;
-  --color-chingu-text-black: #171717;
-  --color-chingu-text-grey: #737373;
-  }
+  /* --- CHINGU BRAND COLORS (NEW) --- */
+  --color-chingubeige: 255 247 237;   /* #FFF7ED */
+  --color-chingumint: 209 250 229;    /* #D1FAE5 */
+  --color-chingublue: 7 150 105;      /* #079669 */
+  --color-chingutextblack: 23 23 23;  /* #171717 */
+  --color-chingutextgrey: 115 115 115; /* #737373 */
+}
 
 .dark {
+  /* Existing dark mode variables */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -126,11 +132,24 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: rgb(var(--color-chingubeige));
+    color: rgb(var(--color-chingutextblack));
+    font-family: 'Inter var', ui-sans-serif, system-ui, sans-serif, 
+                 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 
+                 'Noto Color Emoji';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
+
+.leaflet-container {
+  width: 100%;
+  height: 100vh;
+}
+
