@@ -85,6 +85,26 @@ describe("GET /api/chingus", () => {
     );
   });
 
+
+  // COUNTRY CODE — case-insensitive exact match
+  test("should apply case-insensitive exact match for countryCode", async () => {
+    mockFindChain([]);
+    Chingu.countDocuments.mockResolvedValue(0);
+
+    const res = await request(app).get("/api/chingus?countryCode=in");
+
+    expect(res.status).toBe(200);
+
+    expect(Chingu.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        countryCode: {
+          $regex: "^in$", // escaped + anchored
+          $options: "i",
+        },
+      })
+    );
+  });
+
   // ------------------------------------------------
   // OTHER FIELDS — DIRECT REGEX (NO $or)
   // ------------------------------------------------
@@ -209,21 +229,20 @@ describe("GET /api/chingus", () => {
   // ------------------------------------------------
   // SERVER ERROR HANDLING
   // ------------------------------------------------
-  test("should return 500 on server error", async () => {
-    const original = console.error;
-    console.error = jest.fn();
-
-    Chingu.find.mockImplementation(() => {
-      throw new Error("DB error");
+    test("should return 500 on server error", async () => {
+    Chingu.find.mockReturnValue({
+      sort: () => ({
+        skip: () => ({
+          limit: () => Promise.reject(new Error("Connection failed")),
+        }),
+      }),
     });
-    // countDocuments won't be reached, but mock it anyway
-    Chingu.countDocuments.mockResolvedValue(0);
+    Chingu.countDocuments.mockRejectedValue(new Error("Count failed"));
 
     const res = await request(app).get("/api/chingus");
 
     expect(res.status).toBe(500);
     expect(res.body.message).toBe("Server error");
-
-    console.error = original;
   });
+  
 });
