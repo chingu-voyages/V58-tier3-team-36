@@ -1,4 +1,5 @@
 const Chingu = require("../models/Chingu");
+const countryCoordinates = require("../data/countryCoordinates.json");
 
 // Escape regex special characters to prevent ReDoS & regex injection
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -54,23 +55,52 @@ const aggregateByCountry = async (req, res) => {
 
     const result = await Chingu.aggregate([
       { $match: matchQuery },
+
       {
         $group: {
-          _id: "$countryName",
+          _id: "$countryCode",
           count: { $sum: 1 },
+
+          // Collect all names, including N/A
+          names: { $addToSet: "$countryName" },
         },
       },
+
       {
         $project: {
           _id: 0,
-          countryName: "$_id",
+          countryCode: "$_id",
           count: 1,
+
+          // Filter out "N/A" and null values
+          countryName: {
+            $first: {
+              $filter: {
+                input: "$names",
+                as: "n",
+                cond: {
+                  $and: [{ $ne: ["$$n", null] }, { $ne: ["$$n", "N/A"] }],
+                },
+              },
+            },
+          },
         },
       },
+
       { $sort: { count: -1 } },
     ]);
 
-    return res.json(result);
+    const enriched = result.map((item) => {
+      const code = item.countryCode?.trim().toUpperCase();
+      const coords = countryCoordinates[code] || null;
+
+      return {
+        ...item,
+        coordinates: coords,
+      };
+    });
+
+    return res.json(enriched);
   } catch (error) {
     console.error("Aggregation error:", error);
     return res.status(500).json({ message: "Server error during aggregation" });
@@ -81,6 +111,7 @@ const getChingus = async (req, res) => {
   try {
     const {
       country,
+      countryCode,
       gender,
       roleType,
       role,
@@ -113,6 +144,13 @@ const getChingus = async (req, res) => {
 
     if (gender) {
       query.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
+    }
+
+    if (countryCode) {
+      query.countryCode = {
+        $regex: `^${escapeRegex(countryCode)}$`,
+        $options: "i",
+      };
     }
 
     if (roleType)

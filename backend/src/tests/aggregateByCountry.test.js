@@ -1,155 +1,281 @@
-// tests/aggregateByCountry.test.js
+// =====================
+// aggregateByCountry.test.js
+// =====================
 
-const request = require("supertest");
-const express = require("express");
+const { aggregateByCountry } = require("../controllers/memberController");
+const Chingu = require("../models/Chingu");
 
-jest.mock("../models/Chingu", () => ({
-  aggregate: jest.fn(),
+// Mock the Chingu model
+jest.mock("../models/Chingu");
+
+// Mock country coordinates
+jest.mock("../data/countryCoordinates.json", () => ({
+  US: { lat: 37.0902, lng: -95.7129 },
+  GB: { lat: 55.3781, lng: -3.436 },
+  CA: { lat: 56.1304, lng: -106.3468 },
 }));
 
-const Chingu = require("../models/Chingu");
-const { aggregateByCountry } = require("../controllers/memberController");
+describe("aggregateByCountry", () => {
+  let req, res;
 
-// Fake express app
-const app = express();
-app.get("/api/chingus/aggregate-by-country", aggregateByCountry);
-
-// Helper for escaped regex
-const escapeRegex = (str) =>
-  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-describe("GET /api/chingus/aggregate-by-country", () => {
   beforeEach(() => {
+    req = { query: {} };
+    res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
     jest.clearAllMocks();
   });
 
-  test("should return aggregated results sorted by count", async () => {
-    const mockData = [
-      { countryName: "India", count: 5 },
-      { countryName: "USA", count: 3 },
-    ];
+  // Dummy data returned from aggregate
+  const mockAggregateResult = [
+    { countryCode: "US", count: 10, countryName: "United States" },
+    { countryCode: "GB", count: 5, countryName: "United Kingdom" },
+  ];
 
-    Chingu.aggregate.mockResolvedValue(mockData);
+  // ------------------------
+  // SUCCESS CASES
+  // ------------------------
+  describe("Successful aggregations", () => {
+    test("aggregates with no filters", async () => {
+      const mockAggregate = jest.fn().mockResolvedValue([
+        { countryCode: "US", count: 10, countryName: "United States" },
+      ]);
+      Chingu.aggregate = mockAggregate;
 
-    const res = await request(app).get("/api/chingus/aggregate-by-country");
+      await aggregateByCountry(req, res);
 
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual(mockData);
+      expect(mockAggregate).toHaveBeenCalled();
 
-    expect(Chingu.aggregate).toHaveBeenCalledWith([
-      { $match: {} },
-      {
-        $group: {
-          _id: "$countryName",
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          countryName: "$_id",
-          count: 1,
-        },
-      },
-      { $sort: { count: -1 } },
-    ]);
-  });
+      const pipeline = mockAggregate.mock.calls[0][0];
 
-  test("should apply sanitized fuzzy filters + exact voyage + numeric yearJoined", async () => {
-    Chingu.aggregate.mockResolvedValue([]);
+      // Validate the $project stage EXACTLY
+      const project = pipeline.find((p) => p.$project);
 
-    const res = await request(app).get(
-      "/api/chingus/aggregate-by-country?country=ind.&gender=female?&voyage=V58&yearJoined=2021"
-    );
-
-    expect(res.status).toBe(200);
-
-    expect(Chingu.aggregate).toHaveBeenCalledWith([
-      {
-        $match: {
-          $or: [
-            {
-              countryName: {
-                $regex: escapeRegex("ind."),
-                $options: "i",
-              },
+      expect(project.$project.countryName).toEqual({
+        $first: {
+          $filter: {
+            input: "$names",
+            as: "n",
+            cond: {
+              $and: [
+                { $ne: ["$$n", null] },
+                { $ne: ["$$n", "N/A"] },
+              ],
             },
-          ],
-          gender: {
-            $regex: `^${escapeRegex("female?")}$`,
-            $options: "i",
           },
-          voyage: "V58",
-          yearJoined: 2021,
         },
-      },
-      {
-        $group: {
-          _id: "$countryName",
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          countryName: "$_id",
-          count: 1,
-        },
-      },
-      { $sort: { count: -1 } },
-    ]);
+      });
+
+      const result = res.json.mock.calls[0][0];
+      expect(result[0]).toMatchObject({
+        countryCode: "US",
+        count: 10,
+        countryName: "United States",
+        coordinates: { lat: 37.0902, lng: -95.7129 },
+      });
+    });
+
+    test("filters by fuzzy country", async () => {
+      req.query.country = "United";
+      Chingu.aggregate = jest.fn().mockResolvedValue(mockAggregateResult);
+
+      await aggregateByCountry(req, res);
+      const match = Chingu.aggregate.mock.calls[0][0][0].$match;
+
+      expect(match.$or[0].countryName).toEqual({
+        $regex: "United",
+        $options: "i",
+      });
+    });
+
+    test("filters by multiple countries", async () => {
+      req.query.country = ["United States", "United Kingdom"];
+      Chingu.aggregate = jest.fn().mockResolvedValue(mockAggregateResult);
+
+      await aggregateByCountry(req, res);
+
+      const match = Chingu.aggregate.mock.calls[0][0][0].$match;
+      expect(match.$or).toHaveLength(2);
+      expect(match.$or[0].countryName.$regex).toBe("United States");
+      expect(match.$or[1].countryName.$regex).toBe("United Kingdom");
+    });
+
+    test("gender exact match", async () => {
+      req.query.gender = "Male";
+      Chingu.aggregate = jest.fn().mockResolvedValue(mockAggregateResult);
+
+      await aggregateByCountry(req, res);
+      const match = Chingu.aggregate.mock.calls[0][0][0].$match;
+
+      expect(match.gender).toEqual({
+        $regex: "^Male$",
+        $options: "i",
+      });
+    });
+
+    test("roleType fuzzy", async () => {
+      req.query.roleType = "Developer";
+      Chingu.aggregate = jest.fn().mockResolvedValue(mockAggregateResult);
+
+      await aggregateByCountry(req, res);
+      const match = Chingu.aggregate.mock.calls[0][0][0].$match;
+
+      expect(match.roleType).toEqual({
+        $regex: "Developer",
+        $options: "i",
+      });
+    });
+
+    test("filters numeric year", async () => {
+      req.query.yearJoined = "2023";
+      Chingu.aggregate = jest.fn().mockResolvedValue(mockAggregateResult);
+
+      await aggregateByCountry(req, res);
+      const match = Chingu.aggregate.mock.calls[0][0][0].$match;
+
+      expect(match.yearJoined).toBe(2023);
+    });
+
+    test("enriches coordinates", async () => {
+      Chingu.aggregate = jest.fn().mockResolvedValue(mockAggregateResult);
+
+      await aggregateByCountry(req, res);
+      const result = res.json.mock.calls[0][0];
+
+      expect(result[0].coordinates).toEqual({ lat: 37.0902, lng: -95.7129 });
+      expect(result[1].coordinates).toEqual({ lat: 55.3781, lng: -3.436 });
+    });
+
+    test("handles missing coordinates", async () => {
+      Chingu.aggregate = jest.fn().mockResolvedValue([
+        { countryCode: "ZZ", count: 3, countryName: "Unknown" },
+      ]);
+
+      await aggregateByCountry(req, res);
+      const result = res.json.mock.calls[0][0];
+      expect(result[0].coordinates).toBeNull();
+    });
+
+    test("sorts descending", async () => {
+      Chingu.aggregate = jest.fn().mockResolvedValue(mockAggregateResult);
+      await aggregateByCountry(req, res);
+
+      const pipeline = Chingu.aggregate.mock.calls[0][0];
+      expect(pipeline[pipeline.length - 1]).toEqual({ $sort: { count: -1 } });
+    });
   });
 
-  test("should support multiple countries using $or", async () => {
-    Chingu.aggregate.mockResolvedValue([]);
+  // ------------------------
+  // REGEX SANITIZATION
+  // ------------------------
+  describe("Regex safety", () => {
+    test("escapes regex in country", async () => {
+      req.query.country = "United.*States";
+      Chingu.aggregate = jest.fn().mockResolvedValue([]);
 
-    const res = await request(app).get(
-      "/api/chingus/aggregate-by-country?country=Tanzania&country=Kenya"
-    );
+      await aggregateByCountry(req, res);
 
-    expect(res.status).toBe(200);
+      const match = Chingu.aggregate.mock.calls[0][0][0].$match;
+      expect(match.$or[0].countryName.$regex).toBe("United\\.\\*States");
+    });
 
-    expect(Chingu.aggregate).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          $match: {
-            $or: [
-              {
-                countryName: {
-                  $regex: escapeRegex("Tanzania"),
-                  $options: "i",
-                },
-              },
-              {
-                countryName: {
-                  $regex: escapeRegex("Kenya"),
-                  $options: "i",
-                },
-              },
-            ],
-          },
-        }),
-      ])
-    );
+    test("escapes regex across all fields", async () => {
+      req.query = {
+        gender: "Male+",
+        roleType: "Dev[eloper]",
+        role: "Front$end",
+        soloProjectTier: "Tier^1",
+        voyageTier: "Tier(2)",
+      };
+      Chingu.aggregate = jest.fn().mockResolvedValue([]);
+
+      await aggregateByCountry(req, res);
+
+      const match = Chingu.aggregate.mock.calls[0][0][0].$match;
+
+      expect(match.gender.$regex).toBe("^Male\\+$");
+      expect(match.roleType.$regex).toBe("Dev\\[eloper\\]");
+      expect(match.role.$regex).toBe("Front\\$end");
+    });
   });
 
-  test("should return empty array when no results found", async () => {
-    Chingu.aggregate.mockResolvedValue([]);
+  // ------------------------
+  // EDGE CASES
+  // ------------------------
+  describe("Edge cases", () => {
+    test("empty country array", async () => {
+      req.query.country = [];
+      Chingu.aggregate = jest.fn().mockResolvedValue([]);
 
-    const res = await request(app).get("/api/chingus/aggregate-by-country");
+      await aggregateByCountry(req, res);
+      const match = Chingu.aggregate.mock.calls[0][0][0].$match;
 
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual([]);
+      expect(match.$or).toEqual([]);
+    });
+
+    test("trims whitespace", async () => {
+      req.query.country = "  United States  ";
+      Chingu.aggregate = jest.fn().mockResolvedValue([]);
+
+      await aggregateByCountry(req, res);
+      const match = Chingu.aggregate.mock.calls[0][0][0].$match;
+
+      expect(match.$or[0].countryName.$regex).toBe("United States");
+    });
+
+    test("lowercase countryCode still matches coordinates", async () => {
+      Chingu.aggregate = jest.fn().mockResolvedValue([
+        { countryCode: "us", count: 10, countryName: "United States" },
+      ]);
+
+      await aggregateByCountry(req, res);
+      const result = res.json.mock.calls[0][0];
+
+      expect(result[0].coordinates).toEqual({ lat: 37.0902, lng: -95.7129 });
+    });
+
+    test("whitespace countryCode", async () => {
+      Chingu.aggregate = jest.fn().mockResolvedValue([
+        { countryCode: " US ", count: 10, countryName: "United States" },
+      ]);
+
+      await aggregateByCountry(req, res);
+      const result = res.json.mock.calls[0][0];
+
+      expect(result[0].coordinates).toEqual({ lat: 37.0902, lng: -95.7129 });
+    });
+
+    test("no results returns empty array", async () => {
+      Chingu.aggregate = jest.fn().mockResolvedValue([]);
+      await aggregateByCountry(req, res);
+
+      expect(res.json).toHaveBeenCalledWith([]);
+    });
   });
 
-  test("should return 500 on server error", async () => {
-    Chingu.aggregate.mockRejectedValue(new Error("Aggregation failed"));
+  // ------------------------
+  // ERROR HANDLING
+  // ------------------------
+  describe("Error handling", () => {
+    test("returns 500 on error", async () => {
+      Chingu.aggregate = jest.fn().mockRejectedValue(new Error("DB Error"));
 
-    const res = await request(app).get("/api/chingus/aggregate-by-country");
+      await aggregateByCountry(req, res);
 
-    expect(res.status).toBe(500);
-    expect(res.body).toEqual({
-      message: "Server error during aggregation",
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Server error during aggregation",
+      });
+    });
+
+    test("logs error", async () => {
+      const spy = jest.spyOn(console, "error").mockImplementation();
+      const err = new Error("DB Error");
+
+      Chingu.aggregate = jest.fn().mockRejectedValue(err);
+
+      await aggregateByCountry(req, res);
+
+      expect(spy).toHaveBeenCalledWith("Aggregation error:", err);
+      spy.mockRestore();
     });
   });
 });
