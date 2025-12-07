@@ -25,7 +25,7 @@ export default function ListPage() {
     countryCode: "",
     gender: "",
     roleType: "",
-    role: "",
+    voyageRole: "",
     soloProjectTier: "",
     voyageTier: "",
     voyage: "",
@@ -37,11 +37,11 @@ export default function ListPage() {
     { value: "countryCode", label: "Country Code" },
     { value: "voyageTier", label: "Voyage Tier" },
     { value: "yearJoined", label: "Year Joined" },
-    { value: "role", label: "Role" },
-    { value: "roleType", label: "Role Type" },
+    { value: "voyageRole", label: "Role"},
+    { value: "roleType", label: "Role Type" , type: "select", options: ["Web", "Python", "N/A"] },
     { value: "soloProjectTier", label: "Solo Project Tier" },
     { value: "voyage", label: "Voyage" },
-    { value: "gender", label: "Gender" },
+    { value: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Other"] },
   ];
 
   const fetchChingus = async (page = 1) => {
@@ -61,6 +61,7 @@ export default function ListPage() {
 
       const response = await getChingusList(params);
       setChingus(response.data);
+      console.log("Fetched chingus:", response.data);
       setPagination({
         page: response.page,
         limit: response.limit,
@@ -95,7 +96,7 @@ export default function ListPage() {
       countryCode: "",
       gender: "",
       roleType: "",
-      role: "",
+      voyageRole: "",
       soloProjectTier: "",
       voyageTier: "",
       voyage: "",
@@ -111,7 +112,7 @@ export default function ListPage() {
       countryCode: "",
       gender: "",
       roleType: "",
-      role: "",
+      voyageRole: "",
       soloProjectTier: "",
       voyageTier: "",
       voyage: "",
@@ -149,15 +150,41 @@ export default function ListPage() {
 
             <div className="space-y-2">
               <Label htmlFor="searchValue">Search Value</Label>
-              <Input
-                id="searchValue"
-                type="text"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                placeholder={`Enter ${
-                  searchOptions.find((opt) => opt.value === searchBy)?.label
-                }`}
-              />
+              {searchBy === "roleType" ? (
+                <select
+                  id="searchValue"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Role</option>
+                  <option value="Web">Web</option>
+                  <option value="Python">Python</option>
+                  <option value="N/A">N/A</option>
+                </select>
+              ): searchBy === "gender" ? (
+                <select
+                  id="searchValue"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              ) : (
+                <Input
+                  id="searchValue"
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  placeholder={`Enter ${
+                    searchOptions.find((opt) => opt.value === searchBy)?.label
+                  }`}
+                />
+              )}
             </div>
 
             <div className="flex items-end gap-2">
@@ -241,9 +268,9 @@ export default function ListPage() {
                         <span className="font-medium">Gender:</span> {chingu.gender}
                       </p>
                     )}
-                    {chingu.role && (
+                    {chingu.voyageRole && (
                       <p>
-                        <span className="font-medium">Role:</span> {chingu.role}
+                        <span className="font-medium">Role:</span> {chingu.voyageRole}
                       </p>
                     )}
                     {chingu.roleType && (
