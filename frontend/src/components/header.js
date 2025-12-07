@@ -24,8 +24,8 @@ export default function Header() {
             <Image 
               src="https://www.chingu.io/logo-with-text-192.png" 
               alt="Chingu Logo" 
-              width={90} 
-              height={90} 
+              width={70} 
+              height={70} 
               className="rounded-full h-auto w-auto object-cover"
             />
             <h1 className="text-xl font-extrabold text-[rgb(var(--color-chingublue))] hidden sm:block">Demographics Explorer</h1>
