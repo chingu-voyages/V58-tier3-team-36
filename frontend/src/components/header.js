@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import Navigation from "@/components/navigation";
@@ -25,10 +24,9 @@ export default function Header() {
             <Image 
               src="https://www.chingu.io/logo-with-text-192.png" 
               alt="Chingu Logo" 
-              width={32} 
-              height={32} 
-              className="rounded-full"
-              style={{ height: 'auto' }}
+              width={90} 
+              height={90} 
+              className="rounded-full h-auto w-auto object-cover"
             />
             <h1 className="text-xl font-extrabold text-[rgb(var(--color-chingublue))] hidden sm:block">Demographics Explorer</h1>
           </Link>
@@ -41,13 +39,13 @@ export default function Header() {
           {/* Auth & Mobile Menu Button */}
           <div className="flex items-center space-x-4">
             <div className="hidden md:block">
-                 {/* Auth Section */}
+                {/* Auth Section */}
           <div className="flex items-center gap-4">
           {status === 'authenticated' ? (
             <>
               <span className="text-sm">{session.user.name}</span>
               {session.user.image && (
-                <img
+                <img 
                   src={session.user.image}
                   alt={session.user.name}
                   width={32}
@@ -88,11 +86,28 @@ export default function Header() {
 
         {/* Mobile Dropdown Menu */}
         <div id="mobile-menu" className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'} bg-white shadow-inner border-t border-[rgb(var(--color-chingumint))]/50 p-4`}>
-          <div className="flex flex-col space-y-2">
-            
+          <div className="flex flex-col gap-6">
             {/* Mobile Navigation */}
             <Navigation isMobile={true} closeMenu={closeMobileMenu} />
-
+                      {/* Auth Section */}
+          <div className="flex flex-col gap-4">
+          {status === 'authenticated' ? (
+            <>
+              <Button onClick={() => signOut()} variant="outline" size="sm">
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+            <Link href="/login">
+              <Button variant="outline" size="sm">Sign In</Button>
+            </Link>
+            <Link href="/register">
+              <Button variant="inline" className="hover:cursor-pointer text-[rgb(var(--color-chingu-text-grey))]" size="sm">Register</Button>
+            </Link>
+            </>
+          )}
+        </div>
             <div className="pt-4 border-t mt-4 border-[rgb(var(--color-chingumint))]/50">
             </div>
           </div>
