@@ -26,7 +26,7 @@ export default function Header() {
               alt="Chingu Logo" 
               width={70} 
               height={70} 
-              className="rounded-full h-auto w-auto object-cover"
+              className="rounded-full h-auto w-[90px] object-cover"
             />
             <h1 className="text-xl font-extrabold text-[rgb(var(--color-chingublue))] hidden sm:block">Demographics Explorer</h1>
           </Link>
@@ -89,7 +89,7 @@ export default function Header() {
           <div className="flex flex-col gap-6">
             {/* Mobile Navigation */}
             <Navigation isMobile={true} closeMenu={closeMobileMenu} />
-                      {/* Auth Section */}
+        {/* Auth Section */}
           <div className="flex flex-col gap-4">
           {status === 'authenticated' ? (
             <>
@@ -108,8 +108,6 @@ export default function Header() {
             </>
           )}
         </div>
-            <div className="pt-4 border-t mt-4 border-[rgb(var(--color-chingumint))]/50">
-            </div>
           </div>
         </div>
       </div>
