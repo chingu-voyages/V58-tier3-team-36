@@ -61,7 +61,6 @@ export default function ListPage() {
 
       const response = await getChingusList(params);
       setChingus(response.data);
-      console.log("Fetched chingus:", response.data);
       setPagination({
         page: response.page,
         limit: response.limit,
@@ -70,7 +69,6 @@ export default function ListPage() {
       });
     } catch (err) {
       setError(err.message || "Failed to fetch Chingu members");
-      console.error("Error fetching chingus:", err);
     } finally {
       setLoading(false);
     }
