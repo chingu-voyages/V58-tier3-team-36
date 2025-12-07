@@ -13,7 +13,10 @@ const auth = async (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'THE_SECRET_KEY');
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET must be defined in environment variables');
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Add user info to request
     req.user = decoded;
