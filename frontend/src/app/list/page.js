@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getChingusList } from "@/api/chingus";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,9 @@ export default function ListPage() {
   // Filter states
   const [searchBy, setSearchBy] = useState("country");
   const [searchValue, setSearchValue] = useState("");
-  const [filters, setFilters] = useState({
+  
+  // Initial empty filters state
+  const emptyFilters = {
     country: "",
     countryCode: "",
     gender: "",
@@ -30,21 +32,23 @@ export default function ListPage() {
     voyageTier: "",
     voyage: "",
     yearJoined: "",
-  });
+  };
+  
+  const [filters, setFilters] = useState(emptyFilters);
 
   const searchOptions = [
     { value: "country", label: "Country" },
     { value: "countryCode", label: "Country Code" },
     { value: "voyageTier", label: "Voyage Tier" },
     { value: "yearJoined", label: "Year Joined" },
-    { value: "voyageRole", label: "Role"},
+    { value: "voyageRole", label: "Role" },
     { value: "roleType", label: "Role Type" , type: "select", options: ["Web", "Python", "N/A"] },
     { value: "soloProjectTier", label: "Solo Project Tier" },
     { value: "voyage", label: "Voyage" },
     { value: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Other"] },
   ];
 
-  const fetchChingus = async (page = 1) => {
+  const fetchChingus = useCallback(async (page = 1) => {
     setLoading(true);
     setError(null);
     try {
@@ -72,12 +76,12 @@ export default function ListPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, pagination.limit]);
 
   // Load all members on initial mount
   useEffect(() => {
     fetchChingus(1);
-  }, []);
+  }, [fetchChingus]);
 
   // Refetch when filters change
   useEffect(() => {
@@ -85,41 +89,57 @@ export default function ListPage() {
     if (hasActiveFilters) {
       fetchChingus(1);
     }
-  }, [filters]);
+  }, [filters, fetchChingus]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     setFilters({
-      country: "",
-      countryCode: "",
-      gender: "",
-      roleType: "",
-      voyageRole: "",
-      soloProjectTier: "",
-      voyageTier: "",
-      voyage: "",
-      yearJoined: "",
+      ...emptyFilters,
       [searchBy]: searchValue,
     });
   };
 
   const handleClearFilters = () => {
     setSearchValue("");
-    setFilters({
-      country: "",
-      countryCode: "",
-      gender: "",
-      roleType: "",
-      voyageRole: "",
-      soloProjectTier: "",
-      voyageTier: "",
-      voyage: "",
-      yearJoined: "",
-    });
+    setFilters(emptyFilters);
   };
+  fetchChingus(1);
 
   const handlePageChange = (newPage) => {
     fetchChingus(newPage);
+  };
+
+  // Helper function to get visible page numbers for pagination
+  const getVisiblePages = () => {
+    const { page, totalPages } = pagination;
+    const pages = [];
+
+    // Always show first page
+    if (totalPages >= 1) pages.push(1);
+
+    // Show current page and adjacent pages
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+
+    // Add ellipsis after first page if needed
+    if (start > 2) {
+      pages.push("ellipsis-1");
+    }
+
+    // Add middle pages
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    // Add ellipsis before last page if needed
+    if (end < totalPages - 1) {
+      pages.push("ellipsis-2");
+    }
+
+    // Always show last page (if it's not already included)
+    if (totalPages > 1) pages.push(totalPages);
+
+    return pages;
   };
 
   return (
@@ -160,7 +180,7 @@ export default function ListPage() {
                   <option value="Python">Python</option>
                   <option value="N/A">N/A</option>
                 </select>
-              ): searchBy === "gender" ? (
+              ) : searchBy === "gender" ? (
                 <select
                   id="searchValue"
                   value={searchValue}
@@ -321,34 +341,29 @@ export default function ListPage() {
               </Button>
               
               <div className="flex gap-1">
-                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
-                  .filter((page) => {
-                    // Show first, last, current, and adjacent pages
+                {getVisiblePages().map((page, index) => {
+                  // Render ellipsis
+                  if (typeof page === "string") {
                     return (
-                      page === 1 ||
-                      page === pagination.totalPages ||
-                      Math.abs(page - pagination.page) <= 1
+                      <span key={page} className="px-3 py-2">
+                        ...
+                      </span>
                     );
-                  })
-                  .map((page, index, array) => {
-                    // Add ellipsis between non-consecutive pages
-                    const showEllipsis = index > 0 && page - array[index - 1] > 1;
-                    return (
-                      <div key={page} className="flex gap-1">
-                        {showEllipsis && (
-                          <span className="px-3 py-2">...</span>
-                        )}
-                        <Button
-                          onClick={() => handlePageChange(page)}
-                          variant={
-                            pagination.page === page ? "default" : "outline"
-                          }
-                        >
-                          {page}
-                        </Button>
-                      </div>
-                    );
-                  })}
+                  }
+
+                  // Render page button
+                  return (
+                    <Button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      variant={
+                        pagination.page === page ? "default" : "outline"
+                      }
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
               </div>
 
               <Button
