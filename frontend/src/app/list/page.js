@@ -42,10 +42,10 @@ export default function ListPage() {
     { value: "voyageTier", label: "Voyage Tier" },
     { value: "yearJoined", label: "Year Joined" },
     { value: "voyageRole", label: "Role" },
-    { value: "roleType", label: "Role Type" , type: "select", options: ["Web", "Python", "N/A"] },
+    { value: "roleType", label: "Role Type" },
     { value: "soloProjectTier", label: "Solo Project Tier" },
     { value: "voyage", label: "Voyage" },
-    { value: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Other"] },
+    { value: "gender", label: "Gender" },
   ];
 
   const fetchChingus = useCallback(async (page = 1) => {
@@ -103,7 +103,6 @@ export default function ListPage() {
     setSearchValue("");
     setFilters(emptyFilters);
   };
-  fetchChingus(1);
 
   const handlePageChange = (newPage) => {
     fetchChingus(newPage);
