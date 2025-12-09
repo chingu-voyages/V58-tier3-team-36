@@ -15,8 +15,8 @@ if (!MODEL_NAME) {
 
 /**
  * Call Gemini with a single text prompt and return the model's answer text.
- * @param {string} prompt is fully constructed prompt string.
- * @returns {Promise<string>} is the text of the model's response.
+ * @param {string} prompt - The fully constructed prompt string.
+ * @returns {Promise<string>} The text of the model's response.
  */
 async function callGemini(prompt) {
   if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
