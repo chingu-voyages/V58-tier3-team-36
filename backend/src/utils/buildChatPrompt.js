@@ -56,7 +56,6 @@ function buildChatPrompt(question, context = {}) {
   
   Important:
   - Do NOT invent new endpoints, database collections, or hidden features.
-  - Do NOT talk about internal server details or API keys.
   - Assume you are speaking to an end user, not a developer, unless they clearly ask for technical details.
   `;
 
