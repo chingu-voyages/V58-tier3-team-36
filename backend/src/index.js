@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
+const chatRoute = require("./routes/chatRoute");
+
 const app = express();
 
 // Rate limiting configuration
@@ -25,16 +27,21 @@ const authLimiter = rateLimit({
 });
 
 // Middlewares
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Apply general rate limiter to all routes
 app.use(limiter);
 
 // Routes
+//chat routes
+app.use("/api/chat", chatRoute);
+/////// other routes
 const chinguRoutes = require("./routes/chingumember");
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/chingus", chinguRoutes);
