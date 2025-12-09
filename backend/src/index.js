@@ -39,9 +39,9 @@ app.use(express.json());
 app.use(limiter);
 
 // Routes
-//chat routes
+// Chat routes
 app.use("/api/chat", chatRoute);
-/////// other routes
+// Other routes
 const chinguRoutes = require("./routes/chingumember");
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/chingus", chinguRoutes);
