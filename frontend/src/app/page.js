@@ -119,7 +119,7 @@ export default function Home() {
             width={400}
             height={400}
             alt="community"
-            className="object-cover bg-white-500"
+            className="object-cover bg-white-500 w-auto h-auto"
           />
         </div>
 
@@ -137,7 +137,7 @@ export default function Home() {
             src={"/images/logo.png"}
             width={200}
             height={200}
-            className="animate-spin animation-duration-2000"
+            className="animate-spin animation-duration-2000 h-auto w-auto"
             alt="logo"
           />
         </div>
