@@ -1,4 +1,4 @@
-// backend/src/__tests__/buildChatPrompt.test.js
+// backend/src/tests/buildChatPrompt.test.js
 
 const { buildChatPrompt } = require("../utils/buildChatPrompt");
 
