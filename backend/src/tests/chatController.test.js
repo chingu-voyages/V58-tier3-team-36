@@ -1,4 +1,4 @@
-// backend/src/__tests__/chatController.test.js
+// backend/src/tests/chatController.test.js
 
 const { chatController } = require("../controllers/chatController");
 
