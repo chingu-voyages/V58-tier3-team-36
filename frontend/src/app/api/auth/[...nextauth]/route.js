@@ -39,6 +39,7 @@ export const authOptions = {
               email: data.user.email,
               name: data.user.name,
               image: data.user.image,
+              backendToken: data.token, // Store the backend JWT token
             };
           }
           
@@ -69,6 +70,10 @@ export const authOptions = {
           if (response.ok) {
             const data = await response.json();
             user.id = data.user._id;
+            // Store backend JWT token for Google auth users
+            if (data.token) {
+              user.backendToken = data.token;
+            }
           }
         } catch (error) {
           console.error('Backend sync failed (continuing anyway):', error.message);
@@ -79,12 +84,18 @@ export const authOptions = {
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
+        // Store backend JWT token in the NextAuth token
+        if (user.backendToken) {
+          token.backendToken = user.backendToken;
+        }
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
+        // Make backend token available in session
+        session.backendToken = token.backendToken;
       }
       return session;
     },

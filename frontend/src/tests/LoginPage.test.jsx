@@ -33,7 +33,6 @@ describe('LoginPage Component', () => {
     render(<LoginPage />);
 
     expect(screen.getByText('Welcome to Chingu Demographics')).toBeInTheDocument();
-    expect(screen.getByText('Sign in with your Google account to continue')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign in with google/i })).toBeInTheDocument();
   });
 

@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const authController = require('../controllers/authController');
 const User = require('../models/User');
 
+// Set up test environment
+process.env.JWT_SECRET = 'test-secret-key-for-testing';
+
 // Create a test app
 const app = express();
 app.use(express.json());

@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const generateToken = require('../utils/generateToken');
 
 exports.googleAuth = async (req, res) => {
   try {
@@ -26,7 +26,6 @@ exports.googleAuth = async (req, res) => {
         googleId,
       });
       await user.save();
-      console.log('✅ New user created:', email);
     } else {
       // Update existing user - verify googleId matches
       if (user.googleId && user.googleId !== googleId) {
@@ -35,18 +34,17 @@ exports.googleAuth = async (req, res) => {
           message: 'Google ID mismatch for existing user',
         });
       }
-      
       user.name = name;
       user.image = image;
       if (!user.googleId) {
         user.googleId = googleId;
       }
       await user.save();
-      console.log('User updated:', email);
     }
-
+    const token = generateToken(user);
     res.status(200).json({
       success: true,
+      token,
       user: {
         _id: user._id,
         email: user.email,
@@ -65,7 +63,6 @@ exports.googleAuth = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  // Registration logic here
   try {
     const { email, name, password } = req.body;
     if (!email || !name || !password) {
@@ -108,8 +105,10 @@ exports.register = async (req, res) => {
       password: hashedPassword,
     });
     await user.save();
+    const token = generateToken(user);
     res.status(201).json({
       success: true,
+      token,
       user: {
         email: user.email,
         name: user.name,
@@ -127,7 +126,6 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  // Login logic here
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -159,17 +157,7 @@ exports.login = async (req, res) => {
         message: 'Invalid email or password',
       });
     }
-    
-    // Generate JWT token
-    const token = jwt.sign(
-      { 
-        userId: user._id, 
-        email: user.email 
-      },
-      process.env.JWT_SECRET || 'THE_SECRET_KEY',
-      { expiresIn: '24h' }
-    );
-    
+    const token = generateToken(user);    
     res.status(200).json({
       success: true,
       token,
