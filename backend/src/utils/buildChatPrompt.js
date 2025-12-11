@@ -22,7 +22,6 @@ function buildChatPrompt(question, context = {}) {
     contextDescription = String(context);
   }
 
-  // You can refine this description later as your app evolves.
   const appDescription = `
   You are the built-in AI assistant for the **Chingu Demographics App**.
   
