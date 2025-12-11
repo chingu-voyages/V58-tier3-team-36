@@ -1,4 +1,4 @@
-// backend/src/__tests__/geminiClient.test.js
+// backend/src/tests/geminiClient.test.js
 
 // IMPORTANT: Set env vars BEFORE requiring geminiClient, otherwise they will be undefined.
 process.env.GEMINI_API_KEY = "test-api-key";
