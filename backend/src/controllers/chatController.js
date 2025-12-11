@@ -41,7 +41,8 @@ const chatController = async (req, res) => {
       answer,
     });
   } catch (error) {
-    console.error("Error in /api/chat:", error);
+    console.error("Error in /api/chat:",  error?.message || "Unknown error",
+    error?.name || "NoName" );
 
     return res.status(500).json({
       success: false,
