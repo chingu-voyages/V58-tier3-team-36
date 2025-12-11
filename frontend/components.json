@@ -18,5 +18,8 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "registries": {}
+  "registries": {
+    "@ss-components": "https://shadcnstudio.com/r/components/{name}.json"
+
+  }
 }

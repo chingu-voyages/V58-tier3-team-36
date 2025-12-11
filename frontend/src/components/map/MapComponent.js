@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 
 import { getChingus } from "@/api/chingus";
 import {  EmeraldIcon } from "@/components/map/EmeraldIcon";
+import { useFilter } from "@/context/FilterProvider";
 
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -31,11 +32,12 @@ export default function MapPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mapCenter, setMapCenter] = useState([20, 0]); 
+  const {filters} = useFilter();
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const result = await getChingus();
+        const result = await getChingus({...filters});
         const markers = (result || []).filter(
           (c) => c.coordinates?.lat && c.coordinates?.lng
         );
@@ -69,7 +71,7 @@ export default function MapPage() {
     }
 
     fetchData();
-  }, []);
+  }, [filters]);
 
   if (loading) {
     return (

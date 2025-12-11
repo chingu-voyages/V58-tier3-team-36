@@ -1,4 +1,3 @@
-import axios from "axios"
 import { api } from "./axiosInstance"
 
 export const getChingus = async(params)=>{
