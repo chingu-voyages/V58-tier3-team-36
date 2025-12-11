@@ -49,8 +49,12 @@ async function callGemini(prompt) {
     } catch {
       // ignore JSON/text parse errors here
     }
+    // Log the full error detail for server-side debugging, but do not expose to client
+    console.error(
+      `Gemini API error detail: ${response.status} ${response.statusText} ${errorDetail}`
+    );
     throw new Error(
-      `Gemini API error: ${response.status} ${response.statusText} ${errorDetail}`
+      `Gemini API error: ${response.status} ${response.statusText}`
     );
   }
 
