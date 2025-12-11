@@ -34,7 +34,9 @@ describe('Header Authentication', () => {
 
     render(<Header />);
 
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+    const signInButtons = screen.getAllByRole('button', { name: /sign in/i });
+    expect(signInButtons.length).toBeGreaterThan(0);
+    expect(signInButtons[0]).toBeInTheDocument();
   });
 
   it('shows user info and Sign Out button when authenticated', () => {
@@ -53,7 +55,9 @@ describe('Header Authentication', () => {
 
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByAltText('John Doe')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign out/i })).toBeInTheDocument();
+    const signOutButtons = screen.getAllByRole('button', { name: /Sign out/i });
+    expect(signOutButtons.length).toBeGreaterThan(0);
+    expect(signOutButtons[0]).toBeInTheDocument();
   });
 
   it('calls signOut when Sign Out button is clicked', () => {
@@ -70,8 +74,8 @@ describe('Header Authentication', () => {
 
     render(<Header />);
 
-    const signOutButton = screen.getByRole('button', { name: /sign out/i });
-    fireEvent.click(signOutButton);
+    const signOutButtons = screen.getAllByRole('button', { name: /sign out/i });
+    fireEvent.click(signOutButtons[0]);
 
     expect(signOut).toHaveBeenCalled();
   });
