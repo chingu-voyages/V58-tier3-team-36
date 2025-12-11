@@ -5,20 +5,23 @@ const MODEL_NAME = process.env.GEMINI_MODEL_NAME;
 
 const BASE_URL = "https://generativelanguage.googleapis.com/v1/models";
 
-if (!API_KEY) {
-  throw new Error("GEMINI_API_KEY is not set. Add it to backend .env file.");
-}
-
-if (!MODEL_NAME) {
-  throw new Error("GEMINI_MODEL_NAME is not set. Add it to backend .env file.");
-}
-
 /**
  * Call Gemini with a single text prompt and return the model's answer text.
  * @param {string} prompt - The fully constructed prompt string.
  * @returns {Promise<string>} The text of the model's response.
  */
 async function callGemini(prompt) {
+  if (!API_KEY) {
+    throw new Error("GEMINI_API_KEY is not set. Add it to backend .env file.");
+  }
+  if (!API_KEY || typeof API_KEY !== "string" || !API_KEY.trim()) {
+    throw new Error("GEMINI_API_KEY must be a non-empty string.");
+  }
+  if (!MODEL_NAME) {
+    throw new Error(
+      "GEMINI_MODEL_NAME is not set. Add it to backend .env file."
+    );
+  }
   if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
     throw new Error("Prompt text is required and must be a non-empty string.");
   }

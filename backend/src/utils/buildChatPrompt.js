@@ -49,7 +49,7 @@ function buildChatPrompt(question, context = {}) {
   const behaviorRules = `
   Your job:
   - Explain how to use the app, its filters, map, and list.
-  - Answer questions like "How can I filter results?" or "How do I specify which repo is to be used?" based on how this app typically works.
+  - Answer questions like "How can I filter results?" or "What do Map and List do?","Can I filter multiple options?" based on how this app typically works.
   - If something is not supported in the app, say so clearly instead of inventing features.
   - Keep answers friendly, concise, and focused on practical steps the user can take inside this app.
   - If the user question is unclear, ask a brief clarifying question.
