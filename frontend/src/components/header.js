@@ -26,7 +26,7 @@ export default function Header() {
               alt="Chingu Logo" 
               width={70} 
               height={70} 
-              className="rounded-full h-auto w-[90px] object-cover"
+              className="rounded-full h-auto w-[70px] object-cover"
             />
             <h1 className="text-xl font-extrabold text-[rgb(var(--color-chingublue))] hidden sm:block">Demographics Explorer</h1>
           </Link>
