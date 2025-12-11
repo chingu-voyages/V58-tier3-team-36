@@ -48,8 +48,10 @@ const aggregateByCountry = async (req, res) => {
       };
 
     //  Voyage should be an exact match like "V58"
-    if (voyage) matchQuery.voyage = voyage;
-
+    if (voyage) matchQuery.voyage = {
+        $regex: escapeRegex(voyage),
+        $options: "i",
+      };
     // Exact numeric match
     if (yearJoined) matchQuery.yearJoined = Number(yearJoined);
 
@@ -167,8 +169,10 @@ const getChingus = async (req, res) => {
     if (voyageTier)
       query.voyageTier = { $regex: escapeRegex(voyageTier), $options: "i" };
 
-    // Exact match for voyage IDs
-    if (voyage) query.voyage = voyage;
+    if (voyage) query.voyage =  {
+        $regex: escapeRegex(voyage),
+        $options: "i",
+      };
 
     // Exact numeric match
     if (yearJoined) query.yearJoined = Number(yearJoined);
