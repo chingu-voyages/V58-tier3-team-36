@@ -95,7 +95,7 @@ describe("ListPage", () => {
         expect(getChingusList).toHaveBeenCalledWith({
           page: 1,
           limit: 20,
-          sort: "-timestamp",
+          sort: "-yearJoined",
         });
       });
 
@@ -117,184 +117,108 @@ describe("ListPage", () => {
     });
   });
 
-  describe("Search Functionality", () => {
-    it("renders search form with dropdown and input", async () => {
+  describe("Table Display and Sorting", () => {
+    it("renders table with all column headers", async () => {
       getChingusList.mockResolvedValue(mockChingusData);
       render(<ListPage />);
 
       await waitFor(() => {
-        expect(screen.getByLabelText("Search By")).toBeInTheDocument();
-        expect(screen.getByLabelText("Search Value")).toBeInTheDocument();
+        expect(screen.getByText("Year Joined")).toBeInTheDocument();
+      });
+
+      expect(screen.getByText("Country")).toBeInTheDocument();
+      expect(screen.getByText("Country Code")).toBeInTheDocument();
+      expect(screen.getByText("Gender")).toBeInTheDocument();
+      expect(screen.getByText("Voyage Role")).toBeInTheDocument();
+      expect(screen.getByText("Role Type")).toBeInTheDocument();
+      expect(screen.getByText("Voyage Tier")).toBeInTheDocument();
+      expect(screen.getByText("Solo Project Tier")).toBeInTheDocument();
+      expect(screen.getByText("Voyage")).toBeInTheDocument();
+    });
+
+    it("displays sort indicator on default sorted column", async () => {
+      getChingusList.mockResolvedValue(mockChingusData);
+      render(<ListPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("↓")).toBeInTheDocument();
       });
     });
 
-    it("has all search options in the dropdown", async () => {
+    it("changes sort order when column header is clicked", async () => {
       getChingusList.mockResolvedValue(mockChingusData);
       render(<ListPage />);
 
       await waitFor(() => {
-        const searchBySelect = screen.getByLabelText("Search By");
-        expect(searchBySelect).toBeInTheDocument();
+        expect(screen.getByText("Country")).toBeInTheDocument();
       });
 
-      const searchBySelect = screen.getByLabelText("Search By");
-      expect(searchBySelect).toHaveTextContent("Country");
-      expect(searchBySelect).toHaveTextContent("Country Code");
-      expect(searchBySelect).toHaveTextContent("Voyage Tier");
-      expect(searchBySelect).toHaveTextContent("Year Joined");
-      expect(searchBySelect).toHaveTextContent("Role");
-      expect(searchBySelect).toHaveTextContent("Role Type");
-    });
-
-    it("shows role type dropdown when Role Type is selected", async () => {
-      getChingusList.mockResolvedValue(mockChingusData);
-      render(<ListPage />);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText("Search By")).toBeInTheDocument();
-      });
-
-      const searchBySelect = screen.getByLabelText("Search By");
-      fireEvent.change(searchBySelect, { target: { value: "roleType" } });
-
-      await waitFor(() => {
-        expect(screen.getByText("Select Role")).toBeInTheDocument();
-        const webOptions = screen.getAllByText("Web");
-        expect(webOptions.length).toBeGreaterThan(0);
-        const pythonOptions = screen.getAllByText("Python");
-        expect(pythonOptions.length).toBeGreaterThan(0);
-      });
-    });
-
-    it("shows gender dropdown when Gender is selected", async () => {
-      getChingusList.mockResolvedValue(mockChingusData);
-      render(<ListPage />);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText("Search By")).toBeInTheDocument();
-      });
-
-      const searchBySelect = screen.getByLabelText("Search By");
-      fireEvent.change(searchBySelect, { target: { value: "gender" } });
-
-      await waitFor(() => {
-        expect(screen.getByText("Select Gender")).toBeInTheDocument();
-        const maleOptions = screen.getAllByText("Male");
-        expect(maleOptions.length).toBeGreaterThan(0);
-        const femaleOptions = screen.getAllByText("Female");
-        expect(femaleOptions.length).toBeGreaterThan(0);
-        const otherOptions = screen.getAllByText("Other");
-        expect(otherOptions.length).toBeGreaterThan(0);
-      });
-    });
-
-    it("performs search when form is submitted", async () => {
-      getChingusList.mockResolvedValue(mockChingusData);
-      render(<ListPage />);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText("Search By")).toBeInTheDocument();
-      });
-
-      const searchBySelect = screen.getByLabelText("Search By");
-      const searchValueInput = screen.getByLabelText("Search Value");
-      const searchButton = screen.getByRole("button", { name: /search/i });
-
-      fireEvent.change(searchBySelect, { target: { value: "country" } });
-      fireEvent.change(searchValueInput, { target: { value: "Canada" } });
-      fireEvent.click(searchButton);
+      const countryHeader = screen.getByText("Country").closest("th");
+      fireEvent.click(countryHeader);
 
       await waitFor(() => {
         expect(getChingusList).toHaveBeenCalledWith(
           expect.objectContaining({
-            country: "Canada",
-            page: 1,
-            limit: 20,
-            sort: "-timestamp",
+            sort: "countryName",
           })
         );
       });
     });
 
-    it("displays active filters after search", async () => {
+    it("toggles sort order when same column is clicked again", async () => {
       getChingusList.mockResolvedValue(mockChingusData);
       render(<ListPage />);
 
       await waitFor(() => {
-        expect(screen.getByLabelText("Search By")).toBeInTheDocument();
+        expect(screen.getByText("Year Joined")).toBeInTheDocument();
       });
 
-      const searchValueInput = screen.getByLabelText("Search Value");
-      const searchButton = screen.getByRole("button", { name: /search/i });
-
-      fireEvent.change(searchValueInput, { target: { value: "United States" } });
-      fireEvent.click(searchButton);
-
-      await waitFor(() => {
-        expect(screen.getByText("Active Filters:")).toBeInTheDocument();
-        expect(screen.getByText(/country: United States/i)).toBeInTheDocument();
-      });
-    });
-
-    it("clears filters when Clear button is clicked", async () => {
-      getChingusList.mockResolvedValue(mockChingusData);
-      render(<ListPage />);
+      const yearJoinedHeader = screen.getByText("Year Joined").closest("th");
+      
+      // First click - should toggle to ascending
+      fireEvent.click(yearJoinedHeader);
 
       await waitFor(() => {
-        expect(screen.getByLabelText("Search Value")).toBeInTheDocument();
-      });
-
-      const searchValueInput = screen.getByLabelText("Search Value");
-      const searchButton = screen.getByRole("button", { name: /search/i });
-      const clearButton = screen.getByRole("button", { name: /clear/i });
-
-      // Perform a search
-      fireEvent.change(searchValueInput, { target: { value: "Canada" } });
-      fireEvent.click(searchButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/country: Canada/i)).toBeInTheDocument();
-      });
-
-      // Clear filters
-      fireEvent.click(clearButton);
-
-      await waitFor(() => {
-        expect(screen.queryByText(/country: Canada/i)).not.toBeInTheDocument();
-        expect(searchValueInput.value).toBe("");
+        expect(getChingusList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            sort: "yearJoined",
+          })
+        );
       });
     });
   });
 
-  describe("Member Cards Display", () => {
-    it("displays all member information correctly", async () => {
+  describe("Table Data Display", () => {
+    it("displays all member information correctly in table rows", async () => {
       getChingusList.mockResolvedValue(mockChingusData);
       render(<ListPage />);
 
       await waitFor(() => {
-        expect(screen.getByText(/United States/)).toBeInTheDocument();
+        expect(screen.getByText("United States")).toBeInTheDocument();
       });
 
-      // Check for specific member details
-      expect(screen.getByText(/United States/)).toBeInTheDocument();
-      expect(screen.getByText(/\(US\)/)).toBeInTheDocument();
+      // Check for specific member details in table
+      expect(screen.getByText("United States")).toBeInTheDocument();
+      expect(screen.getByText("US")).toBeInTheDocument();
       expect(screen.getByText("Developer")).toBeInTheDocument();
-      const webElements = screen.getAllByText("Web");
-      expect(webElements.length).toBeGreaterThan(0);
+      expect(screen.getByText("Web")).toBeInTheDocument();
       expect(screen.getByText("V58")).toBeInTheDocument();
+      expect(screen.getByText("2024")).toBeInTheDocument();
     });
 
-    it("renders member cards with proper structure", async () => {
+    it("renders table rows for all members", async () => {
       getChingusList.mockResolvedValue(mockChingusData);
       render(<ListPage />);
 
       await waitFor(() => {
-        const cards = screen.getAllByText(/Country:/);
-        expect(cards).toHaveLength(3);
+        expect(screen.getByText("United States")).toBeInTheDocument();
       });
+
+      expect(screen.getByText("Canada")).toBeInTheDocument();
+      expect(screen.getByText("United Kingdom")).toBeInTheDocument();
     });
 
-    it("displays conditional fields only when available", async () => {
+    it("displays dash for missing fields", async () => {
       const dataWithMissingFields = {
         ...mockChingusData,
         data: [
@@ -312,12 +236,12 @@ describe("ListPage", () => {
       render(<ListPage />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Australia/)).toBeInTheDocument();
+        expect(screen.getByText("Australia")).toBeInTheDocument();
       });
 
-      // Should not display labels for missing fields
-      expect(screen.queryByText("Gender:")).not.toBeInTheDocument();
-      expect(screen.queryByText("Role:")).not.toBeInTheDocument();
+      // Should display dashes for missing fields in table
+      const tableCells = screen.getAllByText("-");
+      expect(tableCells.length).toBeGreaterThan(0);
     });
   });
 
@@ -435,77 +359,62 @@ describe("ListPage", () => {
     });
   });
 
-  describe("Filter by Different Fields", () => {
-    it("filters by country code", async () => {
+  describe("Sorting by Different Columns", () => {
+    it("sorts by country code when header is clicked", async () => {
       getChingusList.mockResolvedValue(mockChingusData);
       render(<ListPage />);
 
       await waitFor(() => {
-        expect(screen.getByLabelText("Search By")).toBeInTheDocument();
+        expect(screen.getByText("Country Code")).toBeInTheDocument();
       });
 
-      const searchBySelect = screen.getByLabelText("Search By");
-      const searchValueInput = screen.getByLabelText("Search Value");
-      const searchButton = screen.getByRole("button", { name: /search/i });
-
-      fireEvent.change(searchBySelect, { target: { value: "countryCode" } });
-      fireEvent.change(searchValueInput, { target: { value: "US" } });
-      fireEvent.click(searchButton);
+      const countryCodeHeader = screen.getByText("Country Code").closest("th");
+      fireEvent.click(countryCodeHeader);
 
       await waitFor(() => {
         expect(getChingusList).toHaveBeenCalledWith(
           expect.objectContaining({
-            countryCode: "US",
+            sort: "countryCode",
           })
         );
       });
     });
 
-    it("filters by year joined", async () => {
+    it("sorts by gender when header is clicked", async () => {
       getChingusList.mockResolvedValue(mockChingusData);
       render(<ListPage />);
 
       await waitFor(() => {
-        expect(screen.getByLabelText("Search By")).toBeInTheDocument();
+        expect(screen.getByText("Gender")).toBeInTheDocument();
       });
 
-      const searchBySelect = screen.getByLabelText("Search By");
-      const searchValueInput = screen.getByLabelText("Search Value");
-      const searchButton = screen.getByRole("button", { name: /search/i });
-
-      fireEvent.change(searchBySelect, { target: { value: "yearJoined" } });
-      fireEvent.change(searchValueInput, { target: { value: "2024" } });
-      fireEvent.click(searchButton);
+      const genderHeader = screen.getByText("Gender").closest("th");
+      fireEvent.click(genderHeader);
 
       await waitFor(() => {
         expect(getChingusList).toHaveBeenCalledWith(
           expect.objectContaining({
-            yearJoined: "2024",
+            sort: "gender",
           })
         );
       });
     });
 
-    it("filters by voyage tier", async () => {
+    it("sorts by voyage tier when header is clicked", async () => {
       getChingusList.mockResolvedValue(mockChingusData);
       render(<ListPage />);
 
       await waitFor(() => {
-        expect(screen.getByLabelText("Search By")).toBeInTheDocument();
+        expect(screen.getByText("Voyage Tier")).toBeInTheDocument();
       });
 
-      const searchBySelect = screen.getByLabelText("Search By");
-      const searchValueInput = screen.getByLabelText("Search Value");
-      const searchButton = screen.getByRole("button", { name: /search/i });
-
-      fireEvent.change(searchBySelect, { target: { value: "voyageTier" } });
-      fireEvent.change(searchValueInput, { target: { value: "Tier 3" } });
-      fireEvent.click(searchButton);
+      const voyageTierHeader = screen.getByText("Voyage Tier").closest("th");
+      fireEvent.click(voyageTierHeader);
 
       await waitFor(() => {
         expect(getChingusList).toHaveBeenCalledWith(
           expect.objectContaining({
-            voyageTier: "Tier 3",
+            sort: "voyageTier",
           })
         );
       });
