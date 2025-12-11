@@ -14,9 +14,6 @@ async function callGemini(prompt) {
   if (!API_KEY) {
     throw new Error("GEMINI_API_KEY is not set. Add it to backend .env file.");
   }
-  if (!API_KEY || typeof API_KEY !== "string" || !API_KEY.trim()) {
-    throw new Error("GEMINI_API_KEY must be a non-empty string.");
-  }
   if (!MODEL_NAME) {
     throw new Error(
       "GEMINI_MODEL_NAME is not set. Add it to backend .env file."
