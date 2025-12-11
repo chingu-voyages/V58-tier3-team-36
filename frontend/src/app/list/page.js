@@ -1,9 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { getChingusList } from "@/api/chingus";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
 export default function ListPage() {
@@ -16,51 +13,18 @@ export default function ListPage() {
     total: 0,
     totalPages: 0,
   });
-
-  // Filter states
-  const [searchBy, setSearchBy] = useState("country");
-  const [searchValue, setSearchValue] = useState("");
-  
-  // Initial empty filters state
-  const emptyFilters = {
-    country: "",
-    countryCode: "",
-    gender: "",
-    roleType: "",
-    voyageRole: "",
-    soloProjectTier: "",
-    voyageTier: "",
-    voyage: "",
-    yearJoined: "",
-  };
-  
-  const [filters, setFilters] = useState(emptyFilters);
-
-  const searchOptions = [
-    { value: "country", label: "Country" },
-    { value: "countryCode", label: "Country Code" },
-    { value: "voyageTier", label: "Voyage Tier" },
-    { value: "yearJoined", label: "Year Joined" },
-    { value: "voyageRole", label: "Role" },
-    { value: "roleType", label: "Role Type" },
-    { value: "soloProjectTier", label: "Solo Project Tier" },
-    { value: "voyage", label: "Voyage" },
-    { value: "gender", label: "Gender" },
-  ];
+  const [sortField, setSortField] = useState("yearJoined");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   const fetchChingus = useCallback(async (page = 1) => {
     setLoading(true);
     setError(null);
     try {
-      const activeFilters = Object.fromEntries(
-        Object.entries(filters).filter(([_, value]) => value !== "")
-      );
-
+      const sortPrefix = sortOrder === "desc" ? "-" : "";
       const params = {
-        ...activeFilters,
         page,
         limit: pagination.limit,
-        sort: "-timestamp",
+        sort: `${sortPrefix}${sortField}`,
       };
 
       const response = await getChingusList(params);
@@ -76,32 +40,22 @@ export default function ListPage() {
     } finally {
       setLoading(false);
     }
-  }, [filters, pagination.limit]);
+  }, [pagination.limit, sortField, sortOrder]);
 
   // Load all members on initial mount
   useEffect(() => {
     fetchChingus(1);
   }, [fetchChingus]);
 
-  // Refetch when filters change
-  useEffect(() => {
-    const hasActiveFilters = Object.values(filters).some(value => value !== "");
-    if (hasActiveFilters) {
-      fetchChingus(1);
+  const handleSort = (field) => {
+    if (sortField === field) {
+      // Toggle sort order if clicking the same field
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // Set new field and default to ascending
+      setSortField(field);
+      setSortOrder("asc");
     }
-  }, [filters, fetchChingus]);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setFilters({
-      ...emptyFilters,
-      [searchBy]: searchValue,
-    });
-  };
-
-  const handleClearFilters = () => {
-    setSearchValue("");
-    setFilters(emptyFilters);
   };
 
   const handlePageChange = (newPage) => {
@@ -145,101 +99,6 @@ export default function ListPage() {
     <main className="container mx-auto px-4 py-8 max-w-7xl">
       <h1 className="text-3xl font-bold mb-6">Chingu Members</h1>
 
-      {/* Search Section */}
-      <Card className="p-6 mb-6">
-        <form onSubmit={handleSearch} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="searchBy">Search By</Label>
-              <select
-                id="searchBy"
-                value={searchBy}
-                onChange={(e) => setSearchBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {searchOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="searchValue">Search Value</Label>
-              {searchBy === "roleType" ? (
-                <select
-                  id="searchValue"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Role</option>
-                  <option value="Web">Web</option>
-                  <option value="Python">Python</option>
-                  <option value="N/A">N/A</option>
-                </select>
-              ) : searchBy === "gender" ? (
-                <select
-                  id="searchValue"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              ) : (
-                <Input
-                  id="searchValue"
-                  type="text"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder={`Enter ${
-                    searchOptions.find((opt) => opt.value === searchBy)?.label
-                  }`}
-                />
-              )}
-            </div>
-
-            <div className="flex items-end gap-2">
-              <Button type="submit" className="flex-1">
-                Search
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClearFilters}
-                className="flex-1"
-              >
-                Clear
-              </Button>
-            </div>
-          </div>
-        </form>
-
-        {/* Active Filters Display */}
-        {Object.entries(filters).some(([_, value]) => value !== "") && (
-          <div className="mt-4 pt-4 border-t">
-            <p className="text-sm font-semibold mb-2">Active Filters:</p>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(filters)
-                .filter(([_, value]) => value !== "")
-                .map(([key, value]) => (
-                  <span
-                    key={key}
-                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                  >
-                    {key}: {value}
-                  </span>
-                ))}
-            </div>
-          </div>
-        )}
-      </Card>
-
       {/* Results Section */}
       {loading && (
         <div className="text-center py-12">
@@ -264,69 +123,146 @@ export default function ListPage() {
             </p>
           </div>
 
-          {/* Members Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {chingus.map((chingu) => (
-              <Card key={chingu._id} className="p-4 hover:shadow-lg transition-shadow">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                      {chingu.yearJoined}
-                    </span>
-                  </div>
-
-                  <div className="text-sm space-y-1 text-gray-600">
-                    <p>
-                      <span className="font-medium">Country:</span>{" "}
-                      {chingu.countryName} ({chingu.countryCode})
-                    </p>
-                    {chingu.gender && (
-                      <p>
-                        <span className="font-medium">Gender:</span> {chingu.gender}
-                      </p>
-                    )}
-                    {chingu.voyageRole && (
-                      <p>
-                        <span className="font-medium">Role:</span> {chingu.voyageRole}
-                      </p>
-                    )}
-                    {chingu.roleType && (
-                      <p>
-                        <span className="font-medium">Role Type:</span>{" "}
-                        {chingu.roleType}
-                      </p>
-                    )}
-                    {chingu.voyageTier && (
-                      <p>
-                        <span className="font-medium">Voyage Tier:</span>{" "}
-                        {chingu.voyageTier}
-                      </p>
-                    )}
-                    {chingu.soloProjectTier && (
-                      <p>
-                        <span className="font-medium">Solo Project Tier:</span>{" "}
-                        {chingu.soloProjectTier}
-                      </p>
-                    )}
-                    {chingu.voyage && (
-                      <p>
-                        <span className="font-medium">Voyage:</span>{" "}
-                        {chingu.voyage}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            ))}
+          {/* Members Table */}
+          <div className="overflow-x-auto mb-6">
+            <table className="w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort("yearJoined")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Year Joined
+                      <span className="text-xs">
+                        {sortField === "yearJoined" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort("countryName")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Country
+                      <span className="text-xs">
+                        {sortField === "countryName" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort("countryCode")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Country Code
+                      <span className="text-xs">
+                        {sortField === "countryCode" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort("gender")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Gender
+                      <span className="text-xs">
+                        {sortField === "gender" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort("voyageRole")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Voyage Role
+                      <span className="text-xs">
+                        {sortField === "voyageRole" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort("roleType")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Role Type
+                      <span className="text-xs">
+                        {sortField === "roleType" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort("voyageTier")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Voyage Tier
+                      <span className="text-xs">
+                        {sortField === "voyageTier" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort("soloProjectTier")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Solo Project Tier
+                      <span className="text-xs">
+                        {sortField === "soloProjectTier" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort("voyage")}
+                  >
+                    <div className="flex items-center gap-2">
+                      Voyage
+                      <span className="text-xs">
+                        {sortField === "voyage" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {chingus.length === 0 ? (
+                  <tr>
+                    <td colSpan="9" className="px-4 py-8 text-center text-gray-600">
+                      No members found matching your criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  chingus.map((chingu, index) => (
+                    <tr 
+                      key={chingu._id} 
+                      className={`hover:bg-gray-50 transition-colors ${
+                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                      }`}
+                    >
+                      <td className="px-4 py-3 text-sm border-b">
+                        <span className="inline-block bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                          {chingu.yearJoined}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm border-b">{chingu.countryName || '-'}</td>
+                      <td className="px-4 py-3 text-sm border-b">{chingu.countryCode || '-'}</td>
+                      <td className="px-4 py-3 text-sm border-b">{chingu.gender || '-'}</td>
+                      <td className="px-4 py-3 text-sm border-b">{chingu.voyageRole || '-'}</td>
+                      <td className="px-4 py-3 text-sm border-b">{chingu.roleType || '-'}</td>
+                      <td className="px-4 py-3 text-sm border-b">{chingu.voyageTier || '-'}</td>
+                      <td className="px-4 py-3 text-sm border-b">{chingu.soloProjectTier || '-'}</td>
+                      <td className="px-4 py-3 text-sm border-b">{chingu.voyage || '-'}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-
-          {chingus.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-600">
-                No members found matching your criteria.
-              </p>
-            </div>
-          )}
 
           {/* Pagination */}
           {pagination.totalPages > 1 && (
