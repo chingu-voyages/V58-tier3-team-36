@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
 
+// Set up test environment
+process.env.JWT_SECRET = 'test-secret-key-for-testing';
+
 // Mock response object
 const mockResponse = () => {
   const res = {};

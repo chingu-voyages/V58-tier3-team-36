@@ -7,8 +7,8 @@ const {
   aggregateByCountry,
 } = require('../controllers/memberController'); 
 
-router.get('/aggregate-by-country', auth, auth, aggregateByCountry);
-router.get('/', auth, auth, getChingus);
+router.get('/aggregate-by-country', auth, aggregateByCountry);
+router.get('/', auth, getChingus);
 
 
 module.exports = router;

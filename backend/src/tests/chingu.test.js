@@ -2,6 +2,9 @@ const request = require("supertest");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 
+// Set up test environment
+process.env.JWT_SECRET = 'test-secret-key-for-testing';
+
 // Reproduce the same escapeRegex used in the controller
 const escapeRegex = (str) =>
   str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -26,11 +29,10 @@ jest.mock("../models/Chingu", () => ({
 
 const Chingu = require("../models/Chingu");
 const { getChingus } = require("../controllers/memberController");
-const auth = require("../middleware/auth");
 
 const app = express();
 app.use(express.json());
-app.get("/api/chingus", auth, getChingus);
+app.get("/api/chingus", getChingus);
 
 describe("GET /api/chingus", () => {
   let testToken;
@@ -51,27 +53,6 @@ describe("GET /api/chingus", () => {
   };
 
   // ------------------------------------------------
-  // AUTHENTICATION TEST
-  // ------------------------------------------------
-  test("should return 401 when no token is provided", async () => {
-    const res = await request(app).get("/api/chingus");
-
-    expect(res.status).toBe(401);
-    expect(res.body.success).toBe(false);
-    expect(res.body.message).toBe('Access denied. No token provided.');
-  });
-
-  test("should return 401 when invalid token is provided", async () => {
-    const res = await request(app)
-      .get("/api/chingus")
-      .set("Authorization", "Bearer invalidtoken123");
-
-    expect(res.status).toBe(401);
-    expect(res.body.success).toBe(false);
-    expect(res.body.message).toBe('Invalid token.');
-  });
-
-  // ------------------------------------------------
   // PAGINATION TEST
   // ------------------------------------------------
   test("should return paginated results", async () => {
@@ -79,8 +60,7 @@ describe("GET /api/chingus", () => {
     Chingu.countDocuments.mockResolvedValue(10);
 
     const res = await request(app)
-      .get("/api/chingus?page=1&limit=1")
-      .set("Authorization", `Bearer ${testToken}`);
+      .get("/api/chingus?page=1&limit=1");
 
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBe(1);
@@ -101,8 +81,7 @@ describe("GET /api/chingus", () => {
     Chingu.countDocuments.mockResolvedValue(0);
 
     const res = await request(app)
-      .get("/api/chingus?country=Tanzania&country=Kenya")
-      .set("Authorization", `Bearer ${testToken}`);
+      .get("/api/chingus?country=Tanzania&country=Kenya");
 
     expect(res.status).toBe(200);
 
@@ -133,8 +112,7 @@ describe("GET /api/chingus", () => {
     Chingu.countDocuments.mockResolvedValue(0);
 
     const res = await request(app)
-      .get("/api/chingus?countryCode=in")
-      .set("Authorization", `Bearer ${testToken}`);
+      .get("/api/chingus?countryCode=in");
 
     expect(res.status).toBe(200);
 
@@ -166,8 +144,7 @@ describe("GET /api/chingus", () => {
       const value = "v42";
 
       const res = await request(app)
-        .get(`/api/chingus?${key}=${value}`)
-        .set("Authorization", `Bearer ${testToken}`);
+        .get(`/api/chingus?${key}=${value}`);
       expect(res.status).toBe(200);
 
       expect(Chingu.find).toHaveBeenCalledWith(
@@ -191,8 +168,7 @@ describe("GET /api/chingus", () => {
     const value = "Male";
 
     const res = await request(app)
-      .get(`/api/chingus?gender=${value}`)
-      .set("Authorization", `Bearer ${testToken}`);
+      .get(`/api/chingus?gender=${value}`);
     expect(res.status).toBe(200);
 
     expect(Chingu.find).toHaveBeenCalledWith(
@@ -215,8 +191,7 @@ describe("GET /api/chingus", () => {
     const voyage = "v58-tier3-team-36";
 
     const res = await request(app)
-      .get(`/api/chingus?voyage=${voyage}`)
-      .set("Authorization", `Bearer ${testToken}`);
+      .get(`/api/chingus?voyage=${voyage}`);
     expect(res.status).toBe(200);
 
     expect(Chingu.find).toHaveBeenCalledWith(
@@ -234,8 +209,7 @@ describe("GET /api/chingus", () => {
     Chingu.countDocuments.mockResolvedValue(0);
 
     const res = await request(app)
-      .get("/api/chingus?yearJoined=2022")
-      .set("Authorization", `Bearer ${testToken}`);
+      .get("/api/chingus?yearJoined=2022");
     expect(res.status).toBe(200);
 
     expect(Chingu.find).toHaveBeenCalledWith(
@@ -257,8 +231,7 @@ describe("GET /api/chingus", () => {
     Chingu.countDocuments.mockResolvedValue(0);
 
     const res = await request(app)
-      .get("/api/chingus?sort=countryName")
-      .set("Authorization", `Bearer ${testToken}`);
+      .get("/api/chingus?sort=countryName");
     expect(res.status).toBe(200);
 
     expect(sortMock).toHaveBeenCalledWith("countryName");
@@ -272,8 +245,7 @@ describe("GET /api/chingus", () => {
     Chingu.countDocuments.mockResolvedValue(0);
 
     const res = await request(app)
-      .get("/api/chingus?page=-5&limit=5000")
-      .set("Authorization", `Bearer ${testToken}`);
+      .get("/api/chingus?page=-5&limit=5000");
 
     expect(res.status).toBe(200);
     // page should be clamped to 1, limit clamped to 100
@@ -295,8 +267,7 @@ describe("GET /api/chingus", () => {
     Chingu.countDocuments.mockRejectedValue(new Error("Count failed"));
 
     const res = await request(app)
-      .get("/api/chingus")
-      .set("Authorization", `Bearer ${testToken}`);
+      .get("/api/chingus");
 
     expect(res.status).toBe(500);
     expect(res.body.message).toBe("Server error");

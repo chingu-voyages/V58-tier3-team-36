@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 
 export default function ListPage() {
   const [chingus, setChingus] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [limit] = useState(20);
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 20,
     total: 0,
     totalPages: 0,
   });
@@ -23,7 +23,7 @@ export default function ListPage() {
       const sortPrefix = sortOrder === "desc" ? "-" : "";
       const params = {
         page,
-        limit: pagination.limit,
+        limit,
         sort: `${sortPrefix}${sortField}`,
       };
 
@@ -31,7 +31,6 @@ export default function ListPage() {
       setChingus(response.data);
       setPagination({
         page: response.page,
-        limit: response.limit,
         total: response.total,
         totalPages: response.totalPages,
       });
@@ -40,7 +39,7 @@ export default function ListPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.limit, sortField, sortOrder]);
+  }, [limit, sortField, sortOrder]);
 
   // Load all members on initial mount
   useEffect(() => {
