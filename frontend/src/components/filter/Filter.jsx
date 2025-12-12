@@ -66,7 +66,7 @@ function Filter() {
     <div className="p-2 grid sm:grid-cols-3 grid-cols-2 gap-3">
       {/* Gender */}
       <div>
-        <label className="text-xs">Gender</label>
+        <label className="text-sm">Gender</label>
         <Select
           value={filters.gender}
           onValueChange={handleSelectChange("gender")}
