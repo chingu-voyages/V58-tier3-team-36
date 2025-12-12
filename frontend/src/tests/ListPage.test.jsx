@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import ListPage from "../app/list/page";
+import ListPage from "@/app/(map-list)/list/page";
 import { getChingusList } from "@/api/chingus";
 
 // Mock the API module
