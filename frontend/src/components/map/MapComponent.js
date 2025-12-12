@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Tooltip, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Tooltip,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { getSession } from "next-auth/react";
 
 import { getChingus } from "@/api/chingus";
 import {  EmeraldIcon } from "@/components/map/EmeraldIcon";
@@ -12,11 +19,11 @@ import { useFilter } from "@/context/FilterProvider";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
-
 
 function MapController({ center }) {
   const map = useMap();
@@ -104,18 +111,17 @@ export default function MapPage() {
   return (
     <MapContainer
       center={mapCenter}
-      zoom={3} 
+      zoom={3}
       scrollWheelZoom={true}
       style={{ height: "100vh", width: "100%" }}
       className="z-0"
-      worldCopyJump={true} 
+      worldCopyJump={true}
       maxBounds={[
         [-80, -170],
         [80, 190],
-      ]} 
-      maxBoundsViscosity={0.8} 
+      ]}
+      maxBoundsViscosity={0.8}
     >
-      
       <MapController center={mapCenter} />
 
       <TileLayer
