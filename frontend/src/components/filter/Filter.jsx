@@ -191,7 +191,17 @@ function Filter() {
       <div className="max-sm:hidden" />
 
       <div className="max-sm:col-span-2 gap-2 grid grid-cols-3">
-        <button disabled={!isAnyFilterApplied()} onClick={handleSearch} className="rounded-sm bg-green-50 cursor-pointer hover:scale-101 p-2 text-center border">
+        {!isAnyFilterApplied() && (
+          <span id="search-disabled-reason" className="sr-only">
+            Please select at least one filter before searching.
+          </span>
+        )}
+        <button
+          disabled={!isAnyFilterApplied()}
+          onClick={handleSearch}
+          className="rounded-sm bg-green-50 cursor-pointer hover:scale-101 p-2 text-center border"
+          aria-describedby={!isAnyFilterApplied() ? "search-disabled-reason" : undefined}
+        >
           Search
         </button>
        
