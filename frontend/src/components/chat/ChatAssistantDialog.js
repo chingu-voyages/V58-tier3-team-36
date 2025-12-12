@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+
 import {
   Dialog,
   DialogContent,
@@ -21,7 +23,7 @@ export function ChatAssistantDialog({ isOpen, onClose }) {
       id: 1,
       role: "ai",
       text:
-        "Hi! I’m your in-app assistant. Ask me how to use the map, filters, or list.",
+        "Hi! I’m your in-app assistant for **Chingu Demographics App**. Ask me about the map, filters, or list.",
     },
   ]);
 
@@ -107,7 +109,7 @@ export function ChatAssistantDialog({ isOpen, onClose }) {
           w-[92vw] max-w-[92vw] h-[80vh]
           sm:w-[32rem] sm:max-w-[32rem] sm:h-[70vh]
           lg:w-[38rem] lg:max-w-[38rem] lg:h-[75vh]
-          flex flex-col
+          flex flex-col min-h-0
         "
       >
         <DialogHeader>
@@ -119,31 +121,40 @@ export function ChatAssistantDialog({ isOpen, onClose }) {
           </DialogDescription>
         </DialogHeader>
 
-        {/* Messages */}
-        <ScrollArea className="mt-3 flex-1 rounded-md border border-border p-3 bg-card">
-          <div className="space-y-2">
-            {messages.map((msg) => {
-              const isUser = msg.role === "user";
-              const isError = msg.meta === "error";
+        {/* Messages (scrollable) */}
+        <div className="mt-3 flex-1 min-h-0">
+          <ScrollArea className="h-full rounded-md border border-border bg-card">
+            <div className="p-3 space-y-2">
+              {messages.map((msg) => {
+                const isUser = msg.role === "user";
+                const isError = msg.meta === "error";
 
-              return (
-                <div
-                  key={msg.id}
-                  className={
-                    "max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed " +
-                    (isUser
-                      ? "ml-auto bg-[rgb(var(--color-chingublue))] text-white"
-                      : isError
-                      ? "mr-auto bg-destructive text-white"
-                      : "mr-auto bg-muted text-muted-foreground")
-                  }
-                >
-                  {msg.text}
-                </div>
-              );
-            })}
-          </div>
-        </ScrollArea>
+                return (
+                  <div
+                    key={msg.id}
+                    className={
+                      "max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed " +
+                      (isUser
+                        ? "ml-auto bg-[rgb(var(--color-chingublue))] text-white"
+                        : isError
+                        ? "mr-auto bg-destructive text-white"
+                        : "mr-auto bg-muted text-muted-foreground")
+                    }
+                  >
+                    <div
+                      className={
+                        "prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-ol:my-0 " +
+                        (msg.role === "user" ? "prose-invert" : "")
+                      }
+                    >
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        </div>
 
         {/* Input */}
         <div className="mt-3 flex gap-2">
