@@ -42,7 +42,7 @@ export default function MapPage() {
     async function fetchData() {
       try {
         const s = await getSession();
-        console.log("NEXTAUTH SESSION:", s);
+        
         const result = await getChingus();
         const markers = (result || []).filter(
           (c) => c.coordinates?.lat && c.coordinates?.lng
