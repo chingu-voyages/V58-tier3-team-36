@@ -17,8 +17,6 @@ const aggregateByCountry = async (req, res) => {
       yearJoined,
     } = req.query;
 
-
-
     const matchQuery = {};
 
     // SAFE regex searches (fuzzy for most fields, exact for gender)
