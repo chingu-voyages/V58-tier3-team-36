@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext,useState} from "react";
+import React, { createContext, useContext, useState } from "react";
 
 const FilterContext = createContext(null);
 
@@ -15,11 +15,15 @@ export function FilterProvider({ children }) {
     voyage: "",
   });
 
+  const [searchTrigger, setSearchTrigger] = useState(0);
+
   return (
-    <FilterContext.Provider value={{ filters, setFilters }}>
+    <FilterContext.Provider
+      value={{ filters, setFilters, searchTrigger, setSearchTrigger }}
+    >
       {children}
     </FilterContext.Provider>
   );
 }
 
-export const useFilter = ()=> useContext(FilterContext);
+export const useFilter = () => useContext(FilterContext);

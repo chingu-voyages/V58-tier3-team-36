@@ -12,7 +12,7 @@ import { useFilter } from "@/context/FilterProvider";
 
 function Filter() {
   
-  const {filters,setFilters} = useFilter();
+  const {filters,setFilters,setSearchTrigger} = useFilter();
 
   // Generate years and voyages
   const yearsOfJoin = Array.from({ length: 16 }, (_, i) => 2010 + i);
@@ -33,7 +33,7 @@ function Filter() {
 
   // Handle Search Button
   const handleSearch = () => {
-    console.log("Current filter values:", filters);
+    setSearchTrigger(prev=>prev+1)
   };
 
   const handleClear = () => {
@@ -47,6 +47,7 @@ function Filter() {
       voyageTier: "",
       voyage: "",
     });
+    setSearchTrigger(prev=>prev+1)
   };
 
   const isAnyFilterApplied = () => {
