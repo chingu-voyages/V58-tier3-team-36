@@ -209,7 +209,7 @@ const MultipleSelector = ({
       return;
     }
 
-    const newOption = transToGroupOption(arrayOptions || [], groupBy);
+    const newOption = transToGroupOption(arrayOptions, groupBy);
 
     if (JSON.stringify(newOption) !== JSON.stringify(options)) {
       setOptions(newOption);
@@ -349,7 +349,7 @@ const MultipleSelector = ({
       };
     }
 
-    // Using default filter in `cmdk`. We don&lsquo;t have to provide it.
+    // Using default filter in `cmdk`. We don't have to provide it.
     return undefined;
   }, [creatable, commandProps?.filter]);
 
