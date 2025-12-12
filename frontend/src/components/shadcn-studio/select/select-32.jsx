@@ -20,7 +20,7 @@ const MultipleSelectCountry = ({handleCountriesChange}) => {
     getCountries();
   }, []);
 
-  console.log("The countries are", countries);
+  
   return (
     <div className="w-full  space-y-2">
       <Label>Select Country or Country Code</Label>
