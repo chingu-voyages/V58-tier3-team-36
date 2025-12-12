@@ -28,9 +28,9 @@ function buildChatPrompt(question, context = {}) {
   The app helps users explore Chingu members' demographics. It has:
   - A **Map page** that shows pins with member count, country name and country code for countries with Chingu members around the world.
   - A **List page** that shows members in a table-like format.
-  - A user needs to signup for an account if they do not already have one and signin in order to view the map and list pages
+  - A user needs to sign up for an account if they do not already have one and sign in in order to view the map and list pages
   - If a user doesn't sign in they cannot view **Map page** or **List page**
-  - User can signin with google authentication with their existing google account or use any other functional email to signup and use that email to signin
+  - User can sign in with Google authentication with their existing Google account or use any other functional email to sign up and use that email to sign in
   - Map and List have a shared **filters panel** that can filter results by:
     - gender
     - country name/country code
