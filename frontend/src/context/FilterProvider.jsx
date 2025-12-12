@@ -9,7 +9,7 @@ export function FilterProvider({ children }) {
     yearJoined: "",
     roleType: "",
     voyageRole: "",
-    countries: [],
+    countryCode: [],
     soloProjectTier: "",
     voyageTier: "",
     voyage: "",

@@ -28,7 +28,7 @@ function Filter() {
 
   //  MultipleSelectCountry
   const handleCountriesChange = (selectedCountries) => {
-    setFilters((prev) => ({ ...prev, countries: selectedCountries.map(itm=>itm.value) }));
+    setFilters((prev) => ({ ...prev, countryCode: selectedCountries.map(itm=>itm.value) }));
   };
 
   // Handle Search Button
@@ -42,7 +42,7 @@ function Filter() {
       yearJoined: "",
       roleType: "",
       voyageRole: "",
-      countries: [],
+      countryCode: [],
       soloProjectTier: "",
       voyageTier: "",
       voyage: "",
@@ -56,7 +56,7 @@ function Filter() {
     filters.yearJoined ||
     filters.roleType ||
     filters.voyageRole ||
-    filters.countries.length > 0 ||
+    filters.countryCode.length > 0 ||
     filters.soloProjectTier ||
     filters.voyageTier ||
     filters.voyage

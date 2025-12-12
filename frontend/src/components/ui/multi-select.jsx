@@ -365,7 +365,7 @@ const MultipleSelector = ({
         "h-auto overflow-visible bg-transparent",
         commandProps?.className
       )}
-      // When onSearch is provided, we don&lsquo;t want to filter the options. You can still override it.
+      // When onSearch is provided, we don't want to filter the options. You can still override it.
       shouldFilter={
         commandProps?.shouldFilter !== undefined
           ? commandProps.shouldFilter
