@@ -349,7 +349,7 @@ const MultipleSelector = ({
       };
     }
 
-    // Using default filter in `cmdk`. We don&lsquo;t have to provide it.
+    // Using default filter in `cmdk`. We don't have to provide it.
     return undefined;
   }, [creatable, commandProps?.filter]);
 
