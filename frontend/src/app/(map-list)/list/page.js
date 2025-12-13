@@ -121,7 +121,7 @@ export default function ListPage() {
     if (isAuthenticated && chingus.length > 0) {
       fetchChingus(pagination.page, filters);
     }
-  }, [sortField, sortOrder]);
+  }, [sortField, sortOrder, fetchChingus, pagination.page, filters]);
 
   const handlePageChange = (newPage) => {
     fetchChingus(newPage, filters);
