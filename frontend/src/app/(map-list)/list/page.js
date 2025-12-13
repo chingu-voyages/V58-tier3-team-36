@@ -103,7 +103,7 @@ export default function ListPage() {
     if (isAuthenticated) {
       fetchChingus(1, filters);
     }
-  }, [searchTrigger, filters, isAuthenticated]);
+  }, [searchTrigger, filters, isAuthenticated, fetchChingus]);
 
   const handleSort = (field) => {
     if (sortField === field) {
