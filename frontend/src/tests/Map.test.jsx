@@ -5,13 +5,14 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import MapPage from "@/components/map/MapComponent";
 import { getChingus } from "@/api/chingus";
+import { FilterProvider } from "@/context/FilterProvider";
 
-// Mock the API to avoid calling real backend
+// Mock API
 jest.mock("@/api/chingus", () => ({
   getChingus: jest.fn(),
 }));
 
-// VERY SIMPLE: mock react-leaflet to avoid ESM errors
+// Mock react-leaflet to avoid ESM issues
 jest.mock("react-leaflet", () => ({
   MapContainer: ({ children }) => <div data-testid="map">{children}</div>,
   TileLayer: () => <div></div>,
@@ -24,7 +25,11 @@ describe("MapPage", () => {
   test("renders loading state", () => {
     getChingus.mockResolvedValue([]);
 
-    render(<MapPage />);
+    render(
+      <FilterProvider>
+        <MapPage />
+      </FilterProvider>
+    );
 
     expect(screen.getByText("Loading map...")).toBeInTheDocument();
   });
@@ -39,7 +44,11 @@ describe("MapPage", () => {
       },
     ]);
 
-    render(<MapPage />);
+    render(
+      <FilterProvider>
+        <MapPage />
+      </FilterProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId("map")).toBeInTheDocument();

@@ -31,6 +31,17 @@ const aggregateByCountry = async (req, res) => {
       }));
     }
 
+    if (req.query['countryCode[]']) {
+      
+      const countryCodes = Array.isArray(req.query['countryCode[]'])
+        ? req.query['countryCode[]']
+        : [req.query['countryCode[]']];
+
+      matchQuery.countryCode = {
+        $in: countryCodes.map((c) => String(c).trim().toUpperCase()),
+      };
+    }
+
     if (gender)
       matchQuery.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
     if (roleType)
@@ -48,8 +59,11 @@ const aggregateByCountry = async (req, res) => {
       };
 
     //  Voyage should be an exact match like "V58"
-    if (voyage) matchQuery.voyage = voyage;
-
+    if (voyage)
+      matchQuery.voyage = {
+        $regex: escapeRegex(voyage),
+        $options: "i",
+      };
     // Exact numeric match
     if (yearJoined) matchQuery.yearJoined = Number(yearJoined);
 
@@ -142,15 +156,24 @@ const getChingus = async (req, res) => {
       }));
     }
 
-    if (gender) {
-      query.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
+    if (countryCode) {
+      const countryCodes = Array.isArray(countryCode)
+        ? countryCode
+        : [countryCode];
+
+      query.$or = [
+        ...(query.$or || []),
+        ...countryCodes.map((code) => ({
+          countryCode: {
+            $regex: escapeRegex(String(code).trim()),
+            $options: "i",
+          },
+        })),
+      ];
     }
 
-    if (countryCode) {
-      query.countryCode = {
-        $regex: `^${escapeRegex(countryCode)}$`,
-        $options: "i",
-      };
+    if (gender) {
+      query.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
     }
 
     if (roleType)
@@ -167,8 +190,11 @@ const getChingus = async (req, res) => {
     if (voyageTier)
       query.voyageTier = { $regex: escapeRegex(voyageTier), $options: "i" };
 
-    // Exact match for voyage IDs
-    if (voyage) query.voyage = voyage;
+    if (voyage)
+      query.voyage = {
+        $regex: escapeRegex(voyage),
+        $options: "i",
+      };
 
     // Exact numeric match
     if (yearJoined) query.yearJoined = Number(yearJoined);

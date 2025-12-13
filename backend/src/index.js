@@ -44,7 +44,10 @@ app.use("/api/chat", chatRoute);
 // Other routes
 const chinguRoutes = require("./routes/chingumember");
 const authRoutes = require("./routes/authRoutes");
+const countryRoutes = require('./routes/countryCode');
+
 app.use("/api/chingus", chinguRoutes);
+app.use("/api/country", countryRoutes);
 app.use("/api/auth", authLimiter, authRoutes); // Apply stricter rate limit to auth routes
 
 // Start Server

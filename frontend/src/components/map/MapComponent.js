@@ -13,7 +13,9 @@ import "leaflet/dist/leaflet.css";
 import { getSession } from "next-auth/react";
 
 import { getChingus } from "@/api/chingus";
-import { EmeraldIcon } from "@/components/map/EmeraldIcon";
+import {  EmeraldIcon } from "@/components/map/EmeraldIcon";
+import { useFilter } from "@/context/FilterProvider";
+
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -36,47 +38,55 @@ function MapController({ center }) {
 export default function MapPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mapCenter, setMapCenter] = useState([20, 0]);
+  const [mapCenter, setMapCenter] = useState([20, 0]); 
+  const {filters,searchTrigger} = useFilter();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const s = await getSession();
+  async function fetchData(data={}) {
+    try {
+      const result = await getChingus({...data});
+      const markers = (result || []).filter(
+        (c) => c.coordinates?.lat && c.coordinates?.lng
+      );
+
+      if (markers.length > 0) {
         
-        const result = await getChingus();
-        const markers = (result || []).filter(
-          (c) => c.coordinates?.lat && c.coordinates?.lng
+        const total = markers.reduce(
+          (acc, m) => {
+            acc.lat += m.coordinates.lat;
+            acc.lng += m.coordinates.lng;
+            return acc;
+          },
+          { lat: 0, lng: 0 }
         );
 
-        if (markers.length > 0) {
-          const total = markers.reduce(
-            (acc, m) => {
-              acc.lat += m.coordinates.lat;
-              acc.lng += m.coordinates.lng;
-              return acc;
-            },
-            { lat: 0, lng: 0 }
-          );
+        const center = [
+          total.lat / markers.length,
+          total.lng / markers.length,
+        ];
 
-          const center = [
-            total.lat / markers.length,
-            total.lng / markers.length,
-          ];
-
-          setMapCenter(center);
-        }
-
-        setData(result || []);
-      } catch (error) {
-        console.error("Failed to fetch chingus:", error);
-        setData([]);
-      } finally {
-        setLoading(false);
+        setMapCenter(center);
       }
-    }
 
+      setData(result || []);
+    } catch (error) {
+      console.error("Failed to fetch chingus:", error);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(()=>{
     fetchData();
-  }, []);
+  },[]);
+
+
+  useEffect(() => {
+    if(searchTrigger === 0) return;
+    fetchData(filters);
+  }, [searchTrigger]);
+
+  
 
   if (loading) {
     return (
