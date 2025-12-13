@@ -1,5 +1,8 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useBackendAuth } from "@/hooks/useBackendAuth";
+import { useFilter } from "@/context/FilterProvider";
 import { getChingusList } from "@/api/chingus";
 import { Button } from "@/components/ui/button";
 
@@ -15,17 +18,50 @@ export default function ListPage() {
   });
   const [sortField, setSortField] = useState("yearJoined");
   const [sortOrder, setSortOrder] = useState("desc");
+  const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading } = useBackendAuth();
+  const { filters, searchTrigger } = useFilter();
 
-  const fetchChingus = useCallback(async (page = 1) => {
+  const fetchChingus = useCallback(async (page = 1, filterParams = {}) => {
     setLoading(true);
     setError(null);
     try {
       const sortPrefix = sortOrder === "desc" ? "-" : "";
+      
+      // Build params object with only non-empty filters
       const params = {
         page,
         limit,
         sort: `${sortPrefix}${sortField}`,
       };
+
+      // Add filters only if they have values
+      if (filterParams.gender) {
+        params.gender = filterParams.gender;
+      }
+      if (filterParams.yearJoined) {
+        params.yearJoined = filterParams.yearJoined;
+      }
+      if (filterParams.roleType) {
+        params.roleType = filterParams.roleType;
+      }
+      // Backend uses 'role' not 'voyageRole'
+      if (filterParams.voyageRole) {
+        params.role = filterParams.voyageRole;
+      }
+      // Send countryCode as array - axios will serialize it properly
+      if (filterParams.countryCode && filterParams.countryCode.length > 0) {
+        params.countryCode = filterParams.countryCode;
+      }
+      if (filterParams.soloProjectTier) {
+        params.soloProjectTier = filterParams.soloProjectTier;
+      }
+      if (filterParams.voyageTier) {
+        params.voyageTier = filterParams.voyageTier;
+      }
+      if (filterParams.voyage) {
+        params.voyage = filterParams.voyage;
+      }
 
       const response = await getChingusList(params);
       setChingus(response.data);
@@ -35,16 +71,39 @@ export default function ListPage() {
         totalPages: response.totalPages,
       });
     } catch (err) {
-      setError(err.message || "Failed to fetch Chingu members");
+      // Check for authentication errors
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError("authentication");
+      } else {
+        setError(err.message || "Failed to fetch Chingu members");
+      }
     } finally {
       setLoading(false);
     }
   }, [limit, sortField, sortOrder]);
 
+  // Check authentication status
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setError("authentication");
+      setLoading(false);
+    }
+  }, [authLoading, isAuthenticated]);
+
   // Load all members on initial mount
   useEffect(() => {
-    fetchChingus(1);
-  }, [fetchChingus]);
+    if (isAuthenticated) {
+      fetchChingus(1, filters);
+    }
+  }, [isAuthenticated]);
+
+  // Refetch data when filters change (triggered by search button)
+  useEffect(() => {
+    if (searchTrigger === 0) return;
+    if (isAuthenticated) {
+      fetchChingus(1, filters);
+    }
+  }, [searchTrigger, filters, isAuthenticated, fetchChingus]);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -57,8 +116,15 @@ export default function ListPage() {
     }
   };
 
+  // Re-fetch when sort changes
+  useEffect(() => {
+    if (isAuthenticated && chingus.length > 0) {
+      fetchChingus(pagination.page, filters);
+    }
+  }, [sortField, sortOrder, fetchChingus, pagination.page, filters]);
+
   const handlePageChange = (newPage) => {
-    fetchChingus(newPage);
+    fetchChingus(newPage, filters);
   };
 
   // Helper function to get visible page numbers for pagination
@@ -105,7 +171,39 @@ export default function ListPage() {
         </div>
       )}
 
-      {error && (
+      {error === "authentication" && (
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md mx-auto text-center mt-12">
+          <div className="mb-4">
+            <svg
+              className="mx-auto h-12 w-12 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Authentication Required
+          </h2>
+          <p className="text-gray-600 mb-6">
+            You need to be logged in to view the members list. Please sign in to continue.
+          </p>
+          <Button
+            onClick={() => router.push("/login")}
+            className="bg-emerald-500 hover:bg-emerald-600"
+          >
+            Go to Login
+          </Button>
+        </div>
+      )}
+
+      {error && error !== "authentication" && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
