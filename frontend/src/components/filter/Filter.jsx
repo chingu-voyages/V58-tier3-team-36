@@ -121,10 +121,10 @@ function Filter() {
             <SelectValue placeholder="Select options" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="developer">Developer</SelectItem>
-            <SelectItem value="designer">UI/UX Designer</SelectItem>
-            <SelectItem value="product owner">Product Owner</SelectItem>
-            <SelectItem value="Scrum master">Scrum Master</SelectItem>
+            <SelectItem value="Developer">Developer</SelectItem>
+            <SelectItem value="UI/UX Designer">UI/UX Designer</SelectItem>
+            <SelectItem value="Product Owner">Product Owner</SelectItem>
+            <SelectItem value="Scrum Master">Scrum Master</SelectItem>
             <SelectItem value="Data Scientist">Data Scientist</SelectItem>
             <SelectItem value="N/A">Not available</SelectItem>
           </SelectContent>
