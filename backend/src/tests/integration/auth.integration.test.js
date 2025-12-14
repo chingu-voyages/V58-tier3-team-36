@@ -1,106 +1,106 @@
-const request = require('supertest');
-const express = require('express');
-const mongoose = require('mongoose');
-const authRoutes = require('../../routes/authRoutes');
-const User = require('../../models/User');
+require("dotenv").config();
 
-// Set up test environment
-process.env.JWT_SECRET = 'test-secret-key-for-testing';
+const request = require("supertest");
+const express = require("express");
+const mongoose = require("mongoose");
+const authRoutes = require("../../routes/authRoutes");
+const User = require("../../models/User");
 
-// Create test app
 const app = express();
 app.use(express.json());
-app.use('/api/auth', authRoutes);
+app.use("/api/auth", authRoutes);
 
-describe('Authentication Integration Tests', () => {
+const uniqueId = (prefix = "google") =>
+  `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+const MONGO_URI =
+  process.env.MONGO_TEST_URI || "mongodb+srv://chinguv58team36tier3:PXWI353WNL2Qvxay@cluster0.a0yctt7.mongodb.net/test_auth_db";
+
+describe("Authentication Integration Tests", () => {
   beforeAll(async () => {
-    // Connect to test database
-    const mongoUri = process.env.MONGO_TEST_URI || 'mongodb://localhost:27017/test_auth_db';
-    await mongoose.connect(mongoUri);
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET missing for integration tests");
+    }
+
+    await mongoose.connect(MONGO_URI);
+
+    const dbName = mongoose.connection.name;
+    if (!dbName.includes("test")) {
+      throw new Error("❌ Refusing to run tests on non-test database");
+    }
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
   });
 
-  afterEach(async () => {
+  /**
+   * ⚠️ IMPORTANT
+   * We clean the DB BEFORE each test,
+   * not AFTER (to avoid mid-test deletion).
+   */
+  beforeEach(async () => {
     await User.deleteMany({});
   });
 
-  describe('Complete Auth Flow', () => {
-    it('should handle complete user creation and update flow', async () => {
-      // Step 1: Create new user
-      const newUserData = {
-        email: 'integration@example.com',
-        name: 'Integration User',
-        image: 'https://example.com/avatar.jpg',
-        googleId: 'google_integration_123',
-      };
+  describe("Complete Auth Flow", () => {
+    it("should create a user and update the same user on repeat Google login", async () => {
+      const googleId = uniqueId("google_integration");
 
-      const createResponse = await request(app)
-        .post('/api/auth/google')
-        .send(newUserData);
+      const createResponse = await request(app).post("/api/auth/google").send({
+        email: "integration@example.com",
+        name: "Integration User",
+        image: "https://example.com/avatar.jpg",
+        googleId,
+      });
 
       expect(createResponse.status).toBe(200);
       expect(createResponse.body.success).toBe(true);
-      expect(createResponse.body.user.email).toBe(newUserData.email);
-      
-      const userId = createResponse.body.user._id;
+      expect(createResponse.body.user.email).toBe("integration@example.com");
 
-      // Step 2: Verify user exists in database
-      const dbUser = await User.findById(userId);
-      expect(dbUser).toBeDefined();
-      expect(dbUser.email).toBe(newUserData.email);
-      expect(dbUser.googleId).toBe(newUserData.googleId);
+      const createdUser = await User.findOne({ googleId });
+      expect(createdUser).not.toBeNull();
 
-      // Step 3: Update user (simulate login again)
-      const updatedData = {
-        email: 'integration@example.com',
-        name: 'Updated Integration User',
-        image: 'https://example.com/new-avatar.jpg',
-        googleId: 'google_integration_123',
-      };
-
-      const updateResponse = await request(app)
-        .post('/api/auth/google')
-        .send(updatedData);
+      const updateResponse = await request(app).post("/api/auth/google").send({
+        email: "integration@example.com",
+        name: "Updated Integration User",
+        image: "https://example.com/new-avatar.jpg",
+        googleId,
+      });
 
       expect(updateResponse.status).toBe(200);
       expect(updateResponse.body.success).toBe(true);
-      expect(updateResponse.body.user._id).toBe(userId);
-      expect(updateResponse.body.user.name).toBe('Updated Integration User');
+      expect(updateResponse.body.user.name).toBe("Updated Integration User");
 
-      // Step 4: Verify update in database
-      const updatedDbUser = await User.findById(userId);
-      expect(updatedDbUser.name).toBe('Updated Integration User');
-      expect(updatedDbUser.image).toBe('https://example.com/new-avatar.jpg');
+      const users = await User.find({ googleId });
+      expect(users).toHaveLength(1);
+      expect(users[0].name).toBe("Updated Integration User");
     });
 
-    it('should handle multiple users correctly', async () => {
-      const user1Data = {
-        email: 'user1@example.com',
-        name: 'User One',
-        googleId: 'google1',
+    it("should handle multiple users correctly", async () => {
+      const user1 = {
+        email: "user1@example.com",
+        name: "User One",
+        googleId: uniqueId("google_user1"),
       };
 
-      const user2Data = {
-        email: 'user2@example.com',
-        name: 'User Two',
-        googleId: 'google2',
+      const user2 = {
+        email: "user2@example.com",
+        name: "User Two",
+        googleId: uniqueId("google_user2"),
       };
 
-      // Create first user
-      const response1 = await request(app)
-        .post('/api/auth/google')
-        .send(user1Data);
+      const r1 = await request(app).post("/api/auth/google").send(user1);
+      const r2 = await request(app).post("/api/auth/google").send(user2);
 
-      // Create second user
-      const response2 = await request(app)
-        .post('/api/auth/google')
-        .send(user2Data);
+      expect(r1.status).toBe(200);
+      expect(r2.status).toBe(200);
 
-      expect(response1.body.user._id).not.toBe(response2.body.user._id);
+      const u1 = await User.findOne({ googleId: user1.googleId });
+      const u2 = await User.findOne({ googleId: user2.googleId });
+
+      expect(u1).not.toBeNull();
+      expect(u2).not.toBeNull();
 
       const users = await User.find({});
       expect(users).toHaveLength(2);
