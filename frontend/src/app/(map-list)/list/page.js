@@ -18,7 +18,6 @@ export default function ListPage() {
   });
   const [sortField, setSortField] = useState("yearJoined");
   const [sortOrder, setSortOrder] = useState("desc");
-  const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useBackendAuth();
   const { filters, searchTrigger } = useFilter();
 
