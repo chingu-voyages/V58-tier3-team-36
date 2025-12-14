@@ -18,7 +18,6 @@ export default function ListPage() {
   });
   const [sortField, setSortField] = useState("yearJoined");
   const [sortOrder, setSortOrder] = useState("desc");
-  const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useBackendAuth();
   const { filters, searchTrigger } = useFilter();
 
@@ -71,24 +70,15 @@ export default function ListPage() {
         totalPages: response.totalPages,
       });
     } catch (err) {
-      // Check for authentication errors
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        setError("authentication");
-      } else {
+     
         setError(err.message || "Failed to fetch Chingu members");
-      }
+     
     } finally {
       setLoading(false);
     }
   }, [limit, sortField, sortOrder]);
 
-  // Check authentication status
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      setError("authentication");
-      setLoading(false);
-    }
-  }, [authLoading, isAuthenticated]);
+ 
 
   // Load all members on initial mount
   useEffect(() => {
@@ -171,37 +161,7 @@ export default function ListPage() {
         </div>
       )}
 
-      {error === "authentication" && (
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md mx-auto text-center mt-12">
-          <div className="mb-4">
-            <svg
-              className="mx-auto h-12 w-12 text-red-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Authentication Required
-          </h2>
-          <p className="text-gray-600 mb-6">
-            You need to be logged in to view the members list. Please sign in to continue.
-          </p>
-          <Button
-            onClick={() => router.push("/login")}
-            className="bg-emerald-500 hover:bg-emerald-600"
-          >
-            Go to Login
-          </Button>
-        </div>
-      )}
+    
 
       {error && error !== "authentication" && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">

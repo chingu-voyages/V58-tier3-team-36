@@ -7,6 +7,29 @@ import { getChingusList } from "@/api/chingus";
 // Mock the API module
 jest.mock("@/api/chingus");
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    refresh: jest.fn(),
+  }),
+}));
+
+jest.mock("@/hooks/useBackendAuth", () => ({
+  useBackendAuth: () => ({
+    isAuthenticated: true,
+    isLoading: false,
+  }),
+}));
+
+jest.mock("@/context/FilterProvider", () => ({
+  useFilter: () => ({
+    filters: {},
+    searchTrigger: 0,
+  }),
+}));
+
+
 // Mock data
 const mockChingusData = {
   page: 1,

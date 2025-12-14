@@ -8,6 +8,7 @@ const aggregateByCountry = async (req, res) => {
   try {
     const {
       country,
+      countryCode,
       gender,
       roleType,
       role,
@@ -31,11 +32,10 @@ const aggregateByCountry = async (req, res) => {
       }));
     }
 
-    if (req.query['countryCode[]']) {
-      
-      const countryCodes = Array.isArray(req.query['countryCode[]'])
-        ? req.query['countryCode[]']
-        : [req.query['countryCode[]']];
+    if (countryCode) {
+      const countryCodes = Array.isArray(countryCode)
+        ? countryCode
+        : [countryCode];
 
       matchQuery.countryCode = {
         $in: countryCodes.map((c) => String(c).trim().toUpperCase()),
@@ -46,7 +46,7 @@ const aggregateByCountry = async (req, res) => {
       matchQuery.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
     if (roleType)
       matchQuery.roleType = { $regex: escapeRegex(roleType), $options: "i" };
-    if (role) matchQuery.role = { $regex: escapeRegex(role), $options: "i" };
+    if (role) matchQuery.voyageRole = { $regex: escapeRegex(role), $options: "i" };
     if (soloProjectTier)
       matchQuery.soloProjectTier = {
         $regex: escapeRegex(soloProjectTier),
@@ -121,106 +121,106 @@ const aggregateByCountry = async (req, res) => {
   }
 };
 
-const getChingus = async (req, res) => {
-  try {
-    const {
-      country,
-      countryCode,
-      gender,
-      roleType,
-      role,
-      soloProjectTier,
-      voyageTier,
-      voyage, // exact match
-      yearJoined,
-      page = 1,
-      limit = 20,
-      sort = "-timestamp",
-    } = req.query;
+  const getChingus = async (req, res) => {
+    try {
+      const {
+        country,
+        countryCode,
+        gender,
+        roleType,
+        role,
+        soloProjectTier,
+        voyageTier,
+        voyage,
+        yearJoined,
+        page = 1,
+        limit = 20,
+        sort = "-timestamp",
+      } = req.query;
 
-    //  Pagination validation
-    const pageNum = Math.max(1, Number(page) || 1);
-    const limitNum = Math.min(100, Math.max(1, Number(limit) || 20)); // cap at 100
+      //  Pagination validation
+      const pageNum = Math.max(1, Number(page) || 1);
+      const limitNum = Math.min(100, Math.max(1, Number(limit) || 20)); // cap at 100
 
-    const query = {};
+      const query = {};
 
-    // SAFE regex searches (fuzzy for most fields, exact for gender)
-    if (country) {
-      const countries = Array.isArray(country) ? country : [country];
+      // SAFE regex searches (fuzzy for most fields, exact for gender)
+      if (country) {
+        const countries = Array.isArray(country) ? country : [country];
 
-      query.$or = countries.map((c) => ({
-        countryName: {
-          $regex: escapeRegex(String(c).trim()),
-          $options: "i",
-        },
-      }));
-    }
-
-    if (countryCode) {
-      const countryCodes = Array.isArray(countryCode)
-        ? countryCode
-        : [countryCode];
-
-      query.$or = [
-        ...(query.$or || []),
-        ...countryCodes.map((code) => ({
-          countryCode: {
-            $regex: escapeRegex(String(code).trim()),
+        query.$or = countries.map((c) => ({
+          countryName: {
+            $regex: escapeRegex(String(c).trim()),
             $options: "i",
           },
-        })),
-      ];
+        }));
+      }
+
+      if (countryCode) {
+        const countryCodes = Array.isArray(countryCode)
+          ? countryCode
+          : [countryCode];
+
+        query.$or = [
+          ...(query.$or || []),
+          ...countryCodes.map((code) => ({
+            countryCode: {
+              $regex: escapeRegex(String(code).trim()),
+              $options: "i",
+            },
+          })),
+        ];
+      }
+
+      if (gender) {
+        query.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
+      }
+
+      if (roleType)
+        query.roleType = { $regex: escapeRegex(roleType), $options: "i" };
+
+      if (role) query.voyageRole = { $regex: escapeRegex(role), $options: "i" };
+
+      if (soloProjectTier)
+        query.soloProjectTier = {
+          $regex: escapeRegex(soloProjectTier),
+          $options: "i",
+        };
+
+      if (voyageTier)
+        query.voyageTier = { $regex: escapeRegex(voyageTier), $options: "i" };
+
+      if (voyage)
+        query.voyage = {
+          $regex: escapeRegex(voyage),
+          $options: "i",
+        };
+
+      // Exact numeric match
+      if (yearJoined) query.yearJoined = Number(yearJoined);
+
+      // Pagination
+      const skip = (pageNum - 1) * limitNum;
+
+      const [data, total] = await Promise.all([
+        Chingu.find(query).sort(sort).skip(skip).limit(limitNum),
+        Chingu.countDocuments(query),
+      ]);
+
+      return res.json({
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+        data,
+      });
+    } catch (error) {
+      console.error("Error fetching chingus:", error);
+      return res.status(500).json({ message: "Server error" });
     }
+  };
 
-    if (gender) {
-      query.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
-    }
-
-    if (roleType)
-      query.roleType = { $regex: escapeRegex(roleType), $options: "i" };
-
-    if (role) query.role = { $regex: escapeRegex(role), $options: "i" };
-
-    if (soloProjectTier)
-      query.soloProjectTier = {
-        $regex: escapeRegex(soloProjectTier),
-        $options: "i",
-      };
-
-    if (voyageTier)
-      query.voyageTier = { $regex: escapeRegex(voyageTier), $options: "i" };
-
-    if (voyage)
-      query.voyage = {
-        $regex: escapeRegex(voyage),
-        $options: "i",
-      };
-
-    // Exact numeric match
-    if (yearJoined) query.yearJoined = Number(yearJoined);
-
-    // Pagination
-    const skip = (pageNum - 1) * limitNum;
-
-    const [data, total] = await Promise.all([
-      Chingu.find(query).sort(sort).skip(skip).limit(limitNum),
-      Chingu.countDocuments(query),
-    ]);
-
-    return res.json({
-      page: pageNum,
-      limit: limitNum,
-      total,
-      totalPages: Math.ceil(total / limitNum),
-      data,
-    });
-  } catch (error) {
-    console.error("Error fetching chingus:", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
-module.exports = {
-  aggregateByCountry,
-  getChingus,
-};
+  module.exports = {
+    aggregateByCountry,
+    getChingus,
+  };
