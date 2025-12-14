@@ -46,7 +46,7 @@ const aggregateByCountry = async (req, res) => {
       matchQuery.gender = { $regex: `^${escapeRegex(gender)}$`, $options: "i" };
     if (roleType)
       matchQuery.roleType = { $regex: escapeRegex(roleType), $options: "i" };
-    if (role) matchQuery.role = { $regex: escapeRegex(role), $options: "i" };
+    if (role) matchQuery.voyageRole = { $regex: escapeRegex(role), $options: "i" };
     if (soloProjectTier)
       matchQuery.soloProjectTier = {
         $regex: escapeRegex(soloProjectTier),
@@ -179,7 +179,7 @@ const aggregateByCountry = async (req, res) => {
       if (roleType)
         query.roleType = { $regex: escapeRegex(roleType), $options: "i" };
 
-      if (role) query.role = { $regex: escapeRegex(role), $options: "i" };
+      if (role) query.voyageRole = { $regex: escapeRegex(role), $options: "i" };
 
       if (soloProjectTier)
         query.soloProjectTier = {
