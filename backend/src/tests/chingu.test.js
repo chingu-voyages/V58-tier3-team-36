@@ -139,7 +139,7 @@ describe("GET /api/chingus", () => {
   // ------------------------------------------------
   const directFuzzyFields = [
     { key: "roleType", mongo: "roleType" },
-    { key: "role", mongo: "role" },
+    { key: "role", mongo: "voyageRole" },
     { key: "soloProjectTier", mongo: "soloProjectTier" },
     { key: "voyageTier", mongo: "voyageTier" },
   ];

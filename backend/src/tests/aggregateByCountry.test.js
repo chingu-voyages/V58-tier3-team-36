@@ -193,7 +193,7 @@ describe("aggregateByCountry", () => {
 
       expect(match.gender.$regex).toBe("^Male\\+$");
       expect(match.roleType.$regex).toBe("Dev\\[eloper\\]");
-      expect(match.role.$regex).toBe("Front\\$end");
+      expect(match.voyageRole.$regex).toBe("Front\\$end");
     });
   });
 
