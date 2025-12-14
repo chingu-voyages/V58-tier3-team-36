@@ -55,7 +55,7 @@ function MapListLayout({ children }) {
       </div>
     );
   }
-   else {
+   else if(isAuthenticated) {
     return (
       <FilterProvider>
         <div className="space-y-4">
@@ -64,6 +64,8 @@ function MapListLayout({ children }) {
         </div>
       </FilterProvider>
     );
+  }else{
+    <div>Something happened </div>
   }
 }
 
