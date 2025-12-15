@@ -22,4 +22,4 @@ Use the following command to execute the seed script, which specifically populat
 npm run seed:demographics
 ```
 #### Project access
-Frontend can be accessed here : https://voyage58team36testv1.vercel.app/
+Frontend can be accessed here : https://chingu-demographics.netlify.app/
