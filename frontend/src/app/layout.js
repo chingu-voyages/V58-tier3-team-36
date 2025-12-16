@@ -1,16 +1,13 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "../components/header";
 import Footer from "../components/footer";
+import AuthSessionProvider from "../components/SessionProvider";
+import ClientShell from "../components/ClientShell";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 export const metadata = {
@@ -21,12 +18,18 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Header />
-         <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
-        <Footer />
+      <body className={inter.variable}>
+        {/* Everything that depends on auth stays inside the provider */}
+        <AuthSessionProvider>
+          <Header />
+          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+          </main>
+          <Footer />
+        </AuthSessionProvider>
+
+        {/* AI chat is outside auth, so it works for all visitors */}
+        <ClientShell />
       </body>
     </html>
   );

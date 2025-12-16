@@ -4,9 +4,6 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Users, Map, List, TrendingUp } from 'lucide-react';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
@@ -122,7 +119,7 @@ export default function Home() {
             width={400}
             height={400}
             alt="community"
-            className="object-cover bg-white-500"
+            className="object-cover bg-white-500 w-auto h-auto"
           />
         </div>
 
@@ -140,7 +137,7 @@ export default function Home() {
             src={"/images/logo.png"}
             width={200}
             height={200}
-            className="animate-spin animation-duration-2000"
+            className="animate-spin animation-duration-2000 h-auto w-auto"
             alt="logo"
           />
         </div>
@@ -168,7 +165,7 @@ export default function Home() {
             <Link href='/map' className="px-8 py-4 bg-[#079669] text-white font-semibold rounded-full hover:bg-[#068055] transition shadow-lg cursor-pointer">
               View Map
             </Link>
-            <Link href='/list' className="px-8 py-4 border-2 border-[#079669] text-[#079669] font-semibold rounded-full hover:bg-emerald-50 transition cursor-pointer rounded-full">
+            <Link href='/list' className="px-8 py-4 border-2 border-[#079669] text-[#079669] font-semibold rounded-full hover:bg-emerald-50 transition cursor-pointer">
               View List
             </Link>
           </div>
